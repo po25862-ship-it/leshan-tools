@@ -4,12 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>新青安3.0 資格快速試算 | 台灣房屋 捷運樂善直營店</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="vendor/tailwind-xinqingan.css">
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="vendor/babel.min.js"></script>
 <style>
   body{ margin:0; }
+  #root:empty::after{
+    content:"載入中...若超過幾秒仍空白，請重新整理，或確認 vendor 資料夾內的檔案有一併上傳。";
+    display:block; padding:24px; font-family:"PingFang TC","Noto Sans TC",sans-serif; color:#999; font-size:.85rem;
+  }
   @media print {
     .no-print { display: none !important; }
     body { background: white !important; }
