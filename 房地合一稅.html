@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>房地合一稅試算 | 台灣房屋 捷運樂善直營店</title>
+<style>
+  :root{
+    --ink:#1c1f22;
+    --paper:#f7f5f1;
+    --panel:#ffffff;
+    --line:#e2ddd3;
+    --accent:#8a3b2b;
+    --accent-soft:#fbeae5;
+    --good:#2f6b4f;
+    --good-soft:#eaf3ee;
+    --muted:#6b6357;
+    --warn:#a8631f;
+    --warn-soft:#fbf0e1;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px;}
+
+  header.page{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header.page h1{
+    font-size:1.5rem;
+    margin:0 0 4px;
+    letter-spacing:.02em;
+  }
+  header.page .sub{
+    color:var(--muted);
+    font-size:.85rem;
+  }
+  header.page .tag{
+    font-size:.72rem;
+    color:var(--accent);
+    border:1px solid var(--accent);
+    padding:3px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+    font-weight:600;
+  }
+
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:18px;
+  }
+  section > h2{
+    font-size:.95rem;
+    margin:0 0 16px;
+    color:var(--accent);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  section > h2 .num{
+    font-size:.7rem;
+    background:var(--accent);
+    color:#fff;
+    width:20px;height:20px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{
+    font-size:.8rem;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .field .hint{
+    font-size:.72rem;
+    color:var(--muted);
+    margin-top:-2px;
+  }
+  input[type="text"],input[type="number"],input[type="date"],select{
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:9px 11px;
+    font-size:.95rem;
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+    width:100%;
+  }
+  input:focus,select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+  }
+  input[type="number"]{font-variant-numeric:tabular-nums;}
+
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .radio-pill{
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 14px;
+    font-size:.85rem;
+    cursor:pointer;
+    background:#fff;
+    user-select:none;
+    transition:all .12s ease;
+  }
+  .radio-pill input{display:none;}
+  .radio-pill.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+    font-weight:600;
+  }
+
+  .checklist{display:flex;flex-direction:column;gap:10px;}
+  .check-item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    cursor:pointer;
+    background:#fff;
+  }
+  .check-item.checked{
+    border-color:var(--good);
+    background:var(--good-soft);
+  }
+  .check-item input{margin-top:3px;flex-shrink:0;}
+  .check-item .label-main{font-size:.88rem;font-weight:600;}
+  .check-item .label-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
+
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .toggle-row .label-main{font-size:.88rem;font-weight:600;}
+  .toggle-row .label-sub{font-size:.76rem;color:var(--muted);}
+  .switch{
+    position:relative;
+    width:44px;height:24px;
+    flex-shrink:0;
+  }
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .track{
+    position:absolute;inset:0;
+    background:#d8d2c4;
+    border-radius:999px;
+    transition:.15s;
+    cursor:pointer;
+  }
+  .switch .track:before{
+    content:"";
+    position:absolute;
+    width:18px;height:18px;
+    left:3px;top:3px;
+    background:#fff;
+    border-radius:50%;
+    transition:.15s;
+    box-shadow:0 1px 2px rgba(0,0,0,.2);
+  }
+  .switch input:checked + .track{background:var(--accent);}
+  .switch input:checked + .track:before{transform:translateX(20px);}
+
+  fieldset{
+    border:1px dashed var(--line);
+    border-radius:8px;
+    padding:14px;
+    margin:0;
+  }
+  fieldset legend{
+    font-size:.8rem;
+    color:var(--muted);
+    font-weight:600;
+    padding:0 6px;
+  }
+  .cost-row{
+    display:grid;
+    grid-template-columns:1fr 140px;
+    gap:10px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .cost-row label{font-size:.85rem;}
+  .cost-total{
+    text-align:right;
+    font-size:.82rem;
+    color:var(--muted);
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px solid var(--line);
+  }
+
+  .fee-pct-block{
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .fee-pct-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+  }
+  .fee-pct-head label{font-size:.85rem;}
+  .pct-toggle{
+    display:inline-flex;
+    border:1px solid var(--line);
+    border-radius:7px;
+    overflow:hidden;
+  }
+  .pct-mode-btn{
+    border:none;
+    background:#fff;
+    color:var(--muted);
+    font-size:.74rem;
+    font-family:inherit;
+    padding:5px 10px;
+    cursor:pointer;
+  }
+  .pct-mode-btn.active{
+    background:var(--accent);
+    color:#fff;
+    font-weight:600;
+  }
+  .fee-pct-block > input[type="number"]{
+    width:100%;
+    max-width:160px;
+    margin-left:auto;
+    display:block;
+  }
+  .fee-pct-input-wrap{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+  }
+  .fee-pct-input-wrap input[type="number"]{
+    width:80px;
+  }
+  .pct-suffix{
+    font-size:.78rem;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .pct-computed{
+    font-size:.82rem;
+    color:var(--ink);
+    font-weight:600;
+    white-space:nowrap;
+  }
+
+  /* Result panel */
+  .result{
+    background:var(--ink);
+    color:#fdfcfa;
+    border-radius:10px;
+    padding:24px;
+    margin-bottom:18px;
+  }
+  .headline-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:16px;
+    margin-bottom:18px;
+    padding-bottom:18px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+  }
+  @media (max-width:600px){
+    .headline-grid{grid-template-columns:1fr;gap:14px;}
+  }
+  .stat-block{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .stat-block:nth-child(2){
+    border-left:1px solid rgba(255,255,255,.15);
+    border-right:1px solid rgba(255,255,255,.15);
+    padding:0 16px;
+  }
+  @media (max-width:600px){
+    .stat-block:nth-child(2){
+      border-left:none;border-right:none;
+      border-top:1px solid rgba(255,255,255,.15);
+      border-bottom:1px solid rgba(255,255,255,.15);
+      padding:14px 0;
+    }
+  }
+  .stat-block .lab{font-size:.8rem;color:#cfc8b8;}
+  .stat-block .amt{
+    font-size:1.6rem;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    line-height:1.2;
+  }
+  .stat-block .amt.profit{color:#bcd9c8;}
+  .stat-block .amt.tax{color:#ffd9c2;}
+  .stat-block .amt.net{color:#fdfcfa;}
+  .stat-block .rate-tag{
+    font-size:.74rem;
+    color:#cfc8b8;
+    margin-top:2px;
+  }
+  .breakdown{display:flex;flex-direction:column;gap:0;}
+  .b-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:.86rem;
+    padding:7px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .b-row .k{color:#cfc8b8;}
+  .b-row .v{font-variant-numeric:tabular-nums;font-weight:600;}
+  .b-row.sub .k{padding-left:14px;color:#a8a094;font-size:.82rem;}
+  .b-row.total{
+    border-bottom:none;
+    border-top:1px solid rgba(255,255,255,.25);
+    margin-top:4px;
+    padding-top:12px;
+    font-size:1rem;
+    font-weight:700;
+  }
+  .b-row.tax{color:#ffd9c2;}
+  .note-box{
+    margin-top:16px;
+    font-size:.78rem;
+    color:#cfc8b8;
+    background:rgba(255,255,255,.06);
+    border-radius:8px;
+    padding:10px 12px;
+    line-height:1.6;
+  }
+  .note-box.warn{
+    background:rgba(168,99,31,.25);
+    color:#ffe0bd;
+  }
+
+  .footer-block{
+    text-align:center;
+    font-size:.78rem;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+    margin-top:8px;
+  }
+  .footer-display{line-height:1.6;}
+  .footer-edit-link{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-size:.74rem;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:inherit;
+    margin-top:6px;
+    padding:4px;
+  }
+  .footer-edit-box{
+    margin-top:12px;
+    text-align:left;
+    background:var(--accent-soft);
+    border:1px solid var(--accent);
+    border-radius:8px;
+    padding:14px;
+  }
+  .footer-edit-box .field label{font-size:.74rem;}
+  .footer-edit-box input{font-size:.85rem;}
+  .footer-save-btn{
+    margin-top:10px;
+    width:100%;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:9px;
+    font-size:.85rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .footer-save-btn:hover{opacity:.9;}
+
+  .small-note{font-size:.74rem;color:var(--muted);}
+
+  .reverse-box{
+    margin-top:16px;
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+  .reverse-hint{
+    font-size:.85rem;
+    color:var(--muted);
+    text-align:center;
+    padding:12px 0;
+  }
+  .reverse-result{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+    background:var(--accent-soft);
+    border:1px solid var(--accent);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .reverse-result .lab{
+    font-size:.82rem;
+    color:var(--accent);
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .reverse-result .amt{
+    font-size:1.6rem;
+    font-weight:700;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  .reverse-result .sub{
+    font-size:.76rem;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  .reverse-apply-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:10px 18px;
+    font-size:.85rem;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    font-family:inherit;
+  }
+  .reverse-apply-btn:hover{opacity:.9;}
+  .reverse-apply-btn:active{transform:scale(.98);}
+
+  .pdf-export-btn{
+    display:block;
+    width:100%;
+    background:var(--ink);
+    color:#fdfcfa;
+    border:1px solid var(--ink);
+    border-radius:8px;
+    padding:13px;
+    font-size:.92rem;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+    margin-bottom:18px;
+  }
+  .pdf-export-btn:hover{opacity:.88;}
+  .pdf-export-btn:active{transform:scale(.99);}
+
+  /* ---- 列印專用摘要（畫面上不顯示，只在列印/輸出PDF時出現） ---- */
+  .print-summary{display:none;}
+
+  @media print{
+    body{background:#fff;}
+    #app{display:none !important;}
+    .no-print{display:none !important;}
+    .print-summary{
+      display:block !important;
+      color:#000;
+      font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+    }
+    .print-summary h1{
+      font-size:1.3rem;
+      margin:0 0 4px;
+      border-bottom:2px solid #000;
+      padding-bottom:8px;
+    }
+    .print-summary .meta{font-size:.8rem;color:#444;margin-bottom:18px;}
+    .print-summary h2{
+      font-size:.92rem;
+      margin:18px 0 8px;
+      padding-bottom:4px;
+      border-bottom:1px solid #999;
+    }
+    .print-summary .prow{
+      display:flex;
+      justify-content:space-between;
+      font-size:.86rem;
+      padding:4px 0;
+      border-bottom:1px dotted #ccc;
+    }
+    .print-summary .prow .k{color:#333;}
+    .print-summary .prow .v{font-weight:600;}
+    .print-summary .highlight-block{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin:14px 0;
+      padding:14px;
+      border:2px solid #000;
+      border-radius:6px;
+    }
+    .print-summary .highlight-block .hstat{text-align:center;flex:1;}
+    .print-summary .highlight-block .hstat .lab{font-size:.76rem;color:#444;}
+    .print-summary .highlight-block .hstat .amt{font-size:1.25rem;font-weight:700;}
+    .print-summary .footer-note{
+      margin-top:24px;
+      padding-top:12px;
+      border-top:1px solid #000;
+      font-size:.76rem;
+      color:#333;
+      text-align:center;
+      line-height:1.7;
+    }
+    .print-summary .disclaimer{
+      font-size:.72rem;
+      color:#666;
+      margin-top:10px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <header class="page">
+    <div>
+      <h1>房地合一稅試算</h1>
+      <div class="sub">House &amp; Land Transaction Income Tax Estimator</div>
+    </div>
+    <div class="tag">房地合一2.0適用</div>
+  </header>
+
+  <!-- 1. 基本交易資訊 -->
+  <section>
+    <h2><span class="num">1</span>交易日期與金額</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="buyDate">買進（取得）日期</label>
+        <input type="date" id="buyDate">
+      </div>
+      <div class="field">
+        <label for="sellDate">賣出（移轉）日期</label>
+        <input type="date" id="sellDate">
+      </div>
+      <div class="field">
+        <label for="buyPrice">買進總價（取得成本）</label>
+        <input type="number" id="buyPrice" placeholder="例：8000000" min="0">
+      </div>
+      <div class="field">
+        <label for="sellPrice">賣出總價（成交價額）</label>
+        <input type="number" id="sellPrice" placeholder="例：10000000" min="0">
+      </div>
+      <div class="field full">
+        <label for="landValueIncrease">土地漲價總數額（已申報土增稅部分）</label>
+        <input type="number" id="landValueIncrease" placeholder="0" min="0">
+        <div class="hint">這部分已經課過土地增值稅，計算房地合一稅時須先扣除，避免重複課稅。若不確定可先填 0。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 費用 -->
+  <section>
+    <h2><span class="num">2</span>取得與持有期間費用</h2>
+    <div class="field full" style="margin-bottom:14px;">
+      <label>費用計算方式</label>
+      <div class="radio-row" id="feeModeRow">
+        <label class="radio-pill active" data-mode="itemized">
+          <input type="radio" name="feeMode" value="itemized" checked>逐項列舉（有憑證）
+        </label>
+        <label class="radio-pill" data-mode="standard">
+          <input type="radio" name="feeMode" value="standard">無憑證，按成交價3%計列（上限30萬元）
+        </label>
+      </div>
+    </div>
+
+    <div id="itemizedFees">
+      <fieldset>
+        <legend>取得時費用</legend>
+        <div class="cost-row"><label>契稅</label><input type="number" id="fee_contract_tax" placeholder="0" min="0"></div>
+        <div class="cost-row"><label>印花稅</label><input type="number" id="fee_stamp_tax" placeholder="0" min="0"></div>
+        <div class="cost-row"><label>代書費（地政士）</label><input type="number" id="fee_notary" placeholder="0" min="0"></div>
+
+        <div class="fee-pct-block">
+          <div class="fee-pct-head">
+            <label>買進仲介服務費</label>
+            <div class="pct-toggle" data-fee="agentBuy">
+              <button type="button" class="pct-mode-btn active" data-mode="amount">輸入金額</button>
+              <button type="button" class="pct-mode-btn" data-mode="percent">輸入%數</button>
+            </div>
+          </div>
+          <input type="number" id="fee_agent_buy" placeholder="0" min="0">
+          <div class="fee-pct-input-wrap" id="fee_agent_buy_pctWrap" style="display:none;">
+            <input type="number" id="fee_agent_buy_pct" placeholder="例：2" min="0" max="100" step="0.1">
+            <span class="pct-suffix">% × 買進總價</span>
+            <span class="pct-computed" id="fee_agent_buy_computed">= 0 元</span>
+          </div>
+        </div>
+      </fieldset>
+      <div style="height:10px;"></div>
+      <fieldset>
+        <legend>持有期間及賣出費用</legend>
+
+        <div class="fee-pct-block">
+          <div class="fee-pct-head">
+            <label>賣出仲介服務費</label>
+            <div class="pct-toggle" data-fee="agentSell">
+              <button type="button" class="pct-mode-btn active" data-mode="amount">輸入金額</button>
+              <button type="button" class="pct-mode-btn" data-mode="percent">輸入%數</button>
+            </div>
+          </div>
+          <input type="number" id="fee_agent_sell" placeholder="0" min="0">
+          <div class="fee-pct-input-wrap" id="fee_agent_sell_pctWrap" style="display:none;">
+            <input type="number" id="fee_agent_sell_pct" placeholder="例：4" min="0" max="100" step="0.1">
+            <span class="pct-suffix">% × 賣出總價</span>
+            <span class="pct-computed" id="fee_agent_sell_computed">= 0 元</span>
+          </div>
+        </div>
+
+        <div class="cost-row"><label>廣告行銷費</label><input type="number" id="fee_ad" placeholder="0" min="0"></div>
+        <div class="cost-row"><label>修繕／裝修費</label><input type="number" id="fee_repair" placeholder="0" min="0"></div>
+        <div class="cost-row"><label>清潔費／其他</label><input type="number" id="fee_other" placeholder="0" min="0"></div>
+        <div class="cost-total">費用合計：<span id="feeItemizedTotal">0</span> 元</div>
+      </fieldset>
+    </div>
+
+    <div id="standardFee" style="display:none;">
+
+      <div class="note-box" style="color:var(--muted);background:var(--accent-soft);">
+        將以成交價額 × 3% 計列為費用，最高以新臺幣30萬元為限（依《房地合一課徵所得稅申報作業要點》第26點，無查得資料或無法提供憑證者適用）。實際支付費用如有合法憑證且金額更高，建議改用逐項列舉以核實認列。
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 身分與自住資格 -->
+  <section>
+    <h2><span class="num">3</span>身分與適用條件</h2>
+    <div class="field full" style="margin-bottom:14px;">
+      <label>納稅義務人身分</label>
+      <div class="radio-row" id="entityRow">
+        <label class="radio-pill active" data-entity="individual">
+          <input type="radio" name="entity" value="individual" checked>個人
+        </label>
+        <label class="radio-pill" data-entity="company">
+          <input type="radio" name="entity" value="company">營利事業（公司）
+        </label>
+      </div>
+    </div>
+
+    <div id="individualOptions">
+      <div class="checklist" id="selfUseChecklist">
+        <label class="check-item" data-check="resident">
+          <input type="checkbox">
+          <div>
+            <div class="label-main">本人、配偶或未成年子女於該房地設有戶籍</div>
+          </div>
+        </label>
+        <label class="check-item" data-check="duration">
+          <input type="checkbox">
+          <div>
+            <div class="label-main">持有並實際居住連續滿6年</div>
+          </div>
+        </label>
+        <label class="check-item" data-check="onlyhouse">
+          <input type="checkbox">
+          <div>
+            <div class="label-main">交易前6年內，本人與配偶及未成年子女名下無其他房屋</div>
+            <div class="label-sub">（不含因繼承取得的房屋）</div>
+          </div>
+        </label>
+        <label class="check-item" data-check="notrented">
+          <input type="checkbox">
+          <div>
+            <div class="label-main">該房地未曾出租、營業或供他人從事營業使用</div>
+          </div>
+        </label>
+      </div>
+
+      <div style="height:14px;"></div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="label-main">非自願性移轉</div>
+          <div class="label-sub">因調職、非自願離職、其他非自願性因素須移轉房地</div>
+        </div>
+        <div class="switch">
+          <input type="checkbox" id="involuntaryToggle">
+          <div class="track"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 反算成交價 -->
+  <section>
+    <h2><span class="num">4</span>反算：客戶想賺多少，該賣多少錢？</h2>
+    <div class="grid">
+      <div class="field">
+        <label>獲利目標類型</label>
+        <div class="radio-row" id="targetTypeRow">
+          <label class="radio-pill active" data-target="gross">
+            <input type="radio" name="targetType" value="gross" checked>總利潤（稅前）
+          </label>
+          <label class="radio-pill" data-target="net">
+            <input type="radio" name="targetType" value="net">稅後淨利
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="targetProfit">期望獲利金額</label>
+        <input type="number" id="targetProfit" placeholder="例：2000000" min="0">
+      </div>
+    </div>
+    <div class="reverse-box" id="reverseBox">
+      <div class="reverse-hint" id="reverseHint">請先填妥買進賣出日期、買進總價，並輸入期望獲利金額</div>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <div class="result" id="resultPanel">
+    <div class="headline-grid">
+      <div class="stat-block">
+        <div class="lab">總利潤（毛利）</div>
+        <div class="amt profit" id="grossProfit">0 元</div>
+      </div>
+      <div class="stat-block">
+        <div class="lab">房地合一稅</div>
+        <div class="amt tax" id="taxAmount">0 元</div>
+        <div class="rate-tag" id="rateTag">稅率 —</div>
+      </div>
+      <div class="stat-block">
+        <div class="lab">稅後淨利</div>
+        <div class="amt net" id="netProfit">0 元</div>
+      </div>
+    </div>
+    <div class="breakdown" id="breakdownBody"></div>
+    <div id="noteArea"></div>
+  </div>
+
+  <button type="button" class="pdf-export-btn" id="exportPdfBtn">輸出 PDF／列印試算結果</button>
+
+  <div class="footer-block" id="footerBlock">
+    <div class="footer-display" id="footerDisplay"></div>
+    <button type="button" class="footer-edit-link" id="footerEditLink">編輯經紀人資訊</button>
+    <div class="footer-edit-box" id="footerEditBox" style="display:none;">
+      <div class="grid">
+        <div class="field">
+          <label for="agentStoreName">店頭名稱</label>
+          <input type="text" id="agentStoreName" placeholder="例：台灣房屋捷運樂善直營店">
+        </div>
+        <div class="field">
+          <label for="agentName">經紀人姓名</label>
+          <input type="text" id="agentName" placeholder="例：劉昭佑">
+        </div>
+        <div class="field full">
+          <label for="agentBrokerInfo">登記經紀人及證號</label>
+          <input type="text" id="agentBrokerInfo" placeholder="例：經紀人 康博超 桃市經字第001240號">
+        </div>
+      </div>
+      <button type="button" class="footer-save-btn" id="footerSaveBtn">儲存（將記住在此裝置上）</button>
+    </div>
+  </div>
+
+</div>
+<!-- /#app -->
+
+<div class="print-summary" id="printSummary"></div>
+
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // ---- UI state toggles ----
+  document.querySelectorAll('#feeModeRow .radio-pill').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      document.querySelectorAll('#feeModeRow .radio-pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      pill.querySelector('input').checked = true;
+      const mode = pill.dataset.mode;
+      $('itemizedFees').style.display = mode === 'itemized' ? 'block' : 'none';
+      $('standardFee').style.display = mode === 'standard' ? 'block' : 'none';
+      calculate();
+    });
+  });
+
+  // ---- 仲介費：金額 / %數 模式切換 ----
+  const agentFeeMode = { agentBuy: 'amount', agentSell: 'amount' };
+
+  function setupAgentFeeToggle(feeKey, amountInputId, pctWrapId, pctInputId){
+    const toggle = document.querySelector(`.pct-toggle[data-fee="${feeKey}"]`);
+    toggle.querySelectorAll('.pct-mode-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        toggle.querySelectorAll('.pct-mode-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        agentFeeMode[feeKey] = btn.dataset.mode;
+        $(amountInputId).style.display = btn.dataset.mode === 'amount' ? 'block' : 'none';
+        $(pctWrapId).style.display = btn.dataset.mode === 'percent' ? 'flex' : 'none';
+        calculate();
+      });
+    });
+    $(pctInputId).addEventListener('input', calculate);
+  }
+
+  setupAgentFeeToggle('agentBuy', 'fee_agent_buy', 'fee_agent_buy_pctWrap', 'fee_agent_buy_pct');
+  setupAgentFeeToggle('agentSell', 'fee_agent_sell', 'fee_agent_sell_pctWrap', 'fee_agent_sell_pct');
+
+  function getAgentFeeValue(feeKey, basePrice){
+    if(feeKey === 'agentBuy'){
+      if(agentFeeMode.agentBuy === 'percent'){
+        const pct = num('fee_agent_buy_pct');
+        const val = basePrice * (pct/100);
+        $('fee_agent_buy_computed').textContent = '= ' + fmt(val);
+        return val;
+      }
+      return num('fee_agent_buy');
+    } else {
+      if(agentFeeMode.agentSell === 'percent'){
+        const pct = num('fee_agent_sell_pct');
+        const val = basePrice * (pct/100);
+        $('fee_agent_sell_computed').textContent = '= ' + fmt(val);
+        return val;
+      }
+      return num('fee_agent_sell');
+    }
+  }
+
+  document.querySelectorAll('#entityRow .radio-pill').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      document.querySelectorAll('#entityRow .radio-pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      pill.querySelector('input').checked = true;
+      $('individualOptions').style.display = pill.dataset.entity === 'individual' ? 'block' : 'none';
+      calculate();
+    });
+  });
+
+  document.querySelectorAll('#targetTypeRow .radio-pill').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      document.querySelectorAll('#targetTypeRow .radio-pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      pill.querySelector('input').checked = true;
+      calculate();
+    });
+  });
+
+  document.querySelectorAll('#selfUseChecklist .check-item').forEach(item=>{
+    item.addEventListener('click', (e)=>{
+      const cb = item.querySelector('input');
+      // allow native checkbox toggle to also work; sync class
+      if(e.target.tagName !== 'INPUT'){ cb.checked = !cb.checked; }
+      item.classList.toggle('checked', cb.checked);
+      calculate();
+    });
+  });
+
+  $('involuntaryToggle').addEventListener('change', calculate);
+
+  document.querySelectorAll('input[type=number], input[type=date]').forEach(el=>{
+    el.addEventListener('input', calculate);
+  });
+
+  // ---- helpers ----
+  function num(id){
+    const v = parseFloat($(id).value);
+    return isNaN(v) ? 0 : v;
+  }
+  function fmt(n){
+    const rounded = Math.round(n);
+    return rounded.toLocaleString('zh-TW') + ' 元';
+  }
+  function fmtSigned(n){
+    const rounded = Math.round(n);
+    const sign = rounded < 0 ? '-' : '−';
+    return (rounded<0 ? '+' : '−') + Math.abs(rounded).toLocaleString('zh-TW') + ' 元';
+  }
+
+  function holdingDays(){
+    const b = $('buyDate').value, s = $('sellDate').value;
+    if(!b || !s) return null;
+    const bd = new Date(b), sd = new Date(s);
+    const diff = Math.round((sd - bd) / (1000*60*60*24));
+    return diff;
+  }
+
+  function holdingYearsLabel(days){
+    if(days === null) return '—';
+    const years = days/365;
+    return years.toFixed(2) + ' 年（' + days + ' 天）';
+  }
+
+  function calcItemizedFeeTotal(buyPrice, sellPrice){
+    const fixedIds = ['fee_contract_tax','fee_stamp_tax','fee_notary','fee_ad','fee_repair','fee_other'];
+    let total = 0;
+    fixedIds.forEach(id=> total += num(id));
+    total += getAgentFeeValue('agentBuy', buyPrice);
+    total += getAgentFeeValue('agentSell', sellPrice);
+    $('feeItemizedTotal').textContent = Math.round(total).toLocaleString('zh-TW');
+    return total;
+  }
+
+  function getFeeMode(){
+    return document.querySelector('#feeModeRow .radio-pill.active').dataset.mode;
+  }
+  function getEntity(){
+    return document.querySelector('#entityRow .radio-pill.active').dataset.entity;
+  }
+  function isSelfUseQualified(){
+    const items = document.querySelectorAll('#selfUseChecklist .check-item input');
+    return Array.from(items).every(cb => cb.checked);
+  }
+
+  function rateForIndividual(days, selfUse, involuntary){
+    if(selfUse){
+      return {label:'自住優惠（400萬以下免稅，超過部分10%）', kind:'selfuse'};
+    }
+    if(involuntary && days <= 730){
+      return {rate:0.20, label:'20%（非自願性移轉，持有2年以內）'};
+    }
+    if(days <= 730) return {rate:0.45, label:'45%（持有2年以內）'};
+    if(days <= 1825) return {rate:0.35, label:'35%（持有超過2年，未滿5年）'};
+    if(days <= 3650) return {rate:0.20, label:'20%（持有超過5年，未滿10年）'};
+    return {rate:0.15, label:'15%（持有超過10年）'};
+  }
+
+  function rateForCompany(days){
+    if(days <= 730) return {rate:0.45, label:'45%（持有2年以內）'};
+    return {rate:0.20, label:'20%（持有超過2年）'};
+  }
+
+  // ---- 反算：目標獲利 → 建議成交價 ----
+  function solveGrossProfitFromTarget(targetType, targetAmount, landInc, days, entity, selfUse, involuntary){
+    if(targetType === 'gross') return targetAmount;
+
+    let rate;
+    if(entity === 'company'){
+      rate = days <= 730 ? 0.45 : 0.20;
+    } else if(!selfUse){
+      if(involuntary && days <= 730) rate = 0.20;
+      else if(days <= 730) rate = 0.45;
+      else if(days <= 1825) rate = 0.35;
+      else if(days <= 3650) rate = 0.20;
+      else rate = 0.15;
+    }
+
+    if(selfUse){
+      const tryNoTax = targetAmount;
+      if(tryNoTax - landInc <= 4000000) return tryNoTax;
+      return (targetAmount - 0.1*landInc - 400000) / 0.9;
+    } else {
+      const tryNoTax = targetAmount;
+      if(tryNoTax - landInc <= 0) return tryNoTax;
+      const gp = (targetAmount - landInc*rate) / (1-rate);
+      if(gp - landInc <= 0) return tryNoTax;
+      return gp;
+    }
+  }
+
+  function solveSellPriceFromGrossProfit(grossProfit, buyPrice, fixedFeeTotal, variableFeeRate){
+    // GP = sellPrice × (1 − variableFeeRate) − buyPrice − fixedFeeTotal
+    return (grossProfit + buyPrice + fixedFeeTotal) / (1 - variableFeeRate);
+  }
+
+  function solveSellPriceStandardMode(grossProfit, buyPrice){
+    const CAP = 300000;
+    const RATE = 0.03;
+    const THRESHOLD = CAP / RATE; // 成交價達此金額時，3%推計費用恰好等於30萬上限
+
+    // 先假設未達上限（費用＝成交價×3%）
+    const priceUncapped = solveSellPriceFromGrossProfit(grossProfit, buyPrice, 0, RATE);
+    if(priceUncapped <= THRESHOLD){
+      return priceUncapped;
+    }
+    // 超過上限，費用固定為30萬
+    return solveSellPriceFromGrossProfit(grossProfit, buyPrice, CAP, 0);
+  }
+
+  function calculateReverse(ctx){
+    const targetAmount = num('targetProfit');
+    const box = $('reverseBox');
+
+    if(ctx.days === null || !ctx.buyPrice || !targetAmount){
+      box.innerHTML = '<div class="reverse-hint">請先填妥買進賣出日期、買進總價，並輸入期望獲利金額</div>';
+      return;
+    }
+
+    const targetType = document.querySelector('#targetTypeRow .radio-pill.active').dataset.target;
+    const selfUse = ctx.entity === 'individual' ? isSelfUseQualified() : false;
+    const involuntary = $('involuntaryToggle').checked;
+
+    const gp = solveGrossProfitFromTarget(targetType, targetAmount, ctx.landInc, ctx.days, ctx.entity, selfUse, involuntary);
+    const sellPriceRaw = ctx.feeMode === 'standard'
+      ? solveSellPriceStandardMode(gp, ctx.buyPrice)
+      : solveSellPriceFromGrossProfit(gp, ctx.buyPrice, ctx.fixedFeeTotal, ctx.variableFeeRate);
+    const suggestedPrice = Math.ceil(sellPriceRaw / 1000) * 1000;
+
+    const targetLabel = targetType === 'gross' ? '總利潤（稅前）' : '稅後淨利';
+
+    box.innerHTML = `
+      <div class="reverse-result">
+        <div>
+          <div class="lab">建議成交價格（達成${targetLabel} ${fmt(targetAmount)}）</div>
+          <div class="amt">${fmt(suggestedPrice)}</div>
+          <div class="sub">已依目前設定之費用模式（含仲介費%數設定）、身分與持有期間稅率反算，並向上取整至千元</div>
+        </div>
+        <button type="button" class="reverse-apply-btn" id="applyReverseBtn">套用至賣出總價</button>
+      </div>
+    `;
+
+    $('applyReverseBtn').addEventListener('click', ()=>{
+      $('sellPrice').value = suggestedPrice;
+      calculate();
+      $('sellPrice').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  }
+
+  function row(k, v, opts={}){
+    const cls = ['b-row', opts.sub ? 'sub':'', opts.total?'total':'', opts.tax?'tax':''].join(' ').trim();
+    return `<div class="${cls}"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  }
+
+  function calculate(){
+    const buyPrice = num('buyPrice');
+    const sellPrice = num('sellPrice');
+    const landInc = num('landValueIncrease');
+    const days = holdingDays();
+    const feeMode = getFeeMode();
+    const entity = getEntity();
+
+    let feeTotal = 0;
+    let fixedFeeTotal = 0;
+    let variableFeeRate = 0;
+    if(feeMode === 'itemized'){
+      feeTotal = calcItemizedFeeTotal(buyPrice, sellPrice);
+      const fixedIds = ['fee_contract_tax','fee_stamp_tax','fee_notary','fee_ad','fee_repair','fee_other'];
+      let fixedSum = 0;
+      fixedIds.forEach(id=> fixedSum += num(id));
+      fixedSum += getAgentFeeValue('agentBuy', buyPrice); // 以已知的買進總價計算，對賣出總價而言仍屬固定值
+      if(agentFeeMode.agentSell === 'percent'){
+        variableFeeRate = num('fee_agent_sell_pct') / 100;
+      } else {
+        fixedSum += num('fee_agent_sell');
+      }
+      fixedFeeTotal = fixedSum;
+    } else {
+      feeTotal = Math.min(sellPrice * 0.03, 300000);
+      fixedFeeTotal = 0;
+      variableFeeRate = 0.03; // 注意：此為簡化反算用途，實際費用有30萬元上限，詳見 solveSellPriceStandardMode
+    }
+
+    // 總利潤（毛利）＝ 成交價額 − 取得成本 − 費用（不含土地漲價總數額，因該數額非實際支出，僅為房地合一稅計稅基礎之扣除項）
+    const grossProfit = sellPrice - buyPrice - feeTotal;
+    const taxableIncome = grossProfit - landInc;
+
+    let html = '';
+    html += row('成交價額（賣出總價）', fmt(sellPrice));
+    html += row('取得成本（買進總價）', fmtSigned(-buyPrice));
+    html += row(feeMode==='itemized' ? '取得及持有費用（逐項列舉）' : '取得及持有費用（按3%計列，上限30萬）', fmtSigned(-feeTotal));
+    html += row('總利潤（毛利）', fmt(grossProfit), {total:true});
+    if(landInc > 0){
+      html += row('土地漲價總數額（已課土增稅部分，計稅基礎用）', fmtSigned(-landInc), {sub:true});
+      html += row('房地合一稅課稅所得', taxableIncome >= 0 ? fmt(taxableIncome) : ('（虧損）' + fmt(Math.abs(taxableIncome))), {sub:true});
+    }
+
+    let taxAmount = 0;
+    let rateLabel = '—';
+
+    if(days === null){
+      rateLabel = '請輸入買進與賣出日期';
+      $('grossProfit').textContent = fmt(grossProfit);
+      $('taxAmount').textContent = '— 元';
+      $('netProfit').textContent = fmt(grossProfit);
+      $('rateTag').textContent = '稅率 —';
+      $('breakdownBody').innerHTML = html;
+      $('noteArea').innerHTML = '';
+      calculateReverse({days, buyPrice, landInc, entity, feeMode, fixedFeeTotal, variableFeeRate});
+      buildPrintSummary({incomplete:true});
+      return;
+    }
+
+    if(taxableIncome <= 0){
+      taxAmount = 0;
+      rateLabel = '課稅所得為負，無應納稅額';
+    } else if(entity === 'company'){
+      const r = rateForCompany(days);
+      taxAmount = taxableIncome * r.rate;
+      rateLabel = r.label;
+      html += row('適用稅率', r.label, {sub:true});
+      html += row('房地合一稅額', fmt(taxAmount), {tax:true});
+    } else {
+      const selfUse = isSelfUseQualified();
+      const involuntary = $('involuntaryToggle').checked;
+      const r = rateForIndividual(days, selfUse, involuntary);
+      if(r.kind === 'selfuse'){
+        const exempt = Math.min(taxableIncome, 4000000);
+        const taxablePart = Math.max(taxableIncome - 4000000, 0);
+        taxAmount = taxablePart * 0.10;
+        rateLabel = r.label;
+        html += row('課稅所得中免稅額度', fmtSigned(-exempt), {sub:true});
+        html += row('超過400萬部分課稅所得', fmt(taxablePart), {sub:true});
+        html += row('適用稅率', '10%', {sub:true});
+        html += row('房地合一稅額', fmt(taxAmount), {tax:true});
+      } else {
+        taxAmount = taxableIncome * r.rate;
+        rateLabel = r.label;
+        html += row('適用稅率', r.label, {sub:true});
+        html += row('房地合一稅額', fmt(taxAmount), {tax:true});
+      }
+    }
+
+    const netProfit = grossProfit - taxAmount;
+    html += row('稅後淨利（總利潤－房地合一稅）', fmt(netProfit), {total:true});
+    html += row('持有期間', holdingYearsLabel(days), {sub:true});
+
+    $('grossProfit').textContent = fmt(grossProfit);
+    $('taxAmount').textContent = fmt(taxAmount);
+    $('netProfit').textContent = fmt(netProfit);
+    $('rateTag').textContent = '稅率　' + rateLabel;
+    $('breakdownBody').innerHTML = html;
+
+    // notes
+    let noteHtml = '';
+    if(entity === 'individual' && !isSelfUseQualified()){
+      const checked = document.querySelectorAll('#selfUseChecklist .check-item input:checked').length;
+      if(checked > 0 && checked < 4){
+        noteHtml += '<div class="note-box warn">自住優惠須四項條件「全部」符合才能適用，目前僅符合 ' + checked + ' / 4 項，故仍以一般稅率計算。</div>';
+      }
+    }
+    if(feeMode === 'standard'){
+      noteHtml += '<div class="note-box">按3%計列之費用，以新臺幣30萬元為上限；若實際費用較高且有合法憑證，建議改用逐項列舉以核實認列較有利。</div>';
+    }
+    if(landInc > 0){
+      noteHtml += '<div class="note-box">已扣除土地漲價總數額，請確認此金額與土地增值稅申報書一致。</div>';
+    }
+    $('noteArea').innerHTML = noteHtml;
+
+    calculateReverse({days, buyPrice, landInc, entity, feeMode, fixedFeeTotal, variableFeeRate});
+    buildPrintSummary({
+      incomplete:false, days, buyPrice, sellPrice, landInc, entity, feeMode,
+      feeTotal, grossProfit, taxAmount, netProfit, rateLabel
+    });
+  }
+
+  function buildPrintSummary(ctx){
+    const box = $('printSummary');
+    if(!box) return;
+
+    if(ctx.incomplete){
+      box.innerHTML = '<h1>房地合一稅試算結果</h1><p>請先完整輸入買進、賣出日期及金額後再輸出。</p>';
+      return;
+    }
+
+    const todayStr = new Date().toLocaleDateString('zh-TW');
+
+    let feeRows = '';
+    if(ctx.feeMode === 'itemized'){
+      const feeItems = [
+        ['契稅', num('fee_contract_tax')],
+        ['印花稅', num('fee_stamp_tax')],
+        ['代書費（地政士）', num('fee_notary')],
+        ['買進仲介服務費', getAgentFeeValue('agentBuy', ctx.buyPrice)],
+        ['賣出仲介服務費', getAgentFeeValue('agentSell', ctx.sellPrice)],
+        ['廣告行銷費', num('fee_ad')],
+        ['修繕／裝修費', num('fee_repair')],
+        ['清潔費／其他', num('fee_other')]
+      ];
+      feeItems.forEach(([label, val])=>{
+        if(val > 0){
+          feeRows += `<div class="prow"><span class="k">${label}</span><span class="v">${fmt(val)}</span></div>`;
+        }
+      });
+      if(feeRows === ''){
+        feeRows = '<div class="prow"><span class="k">（未填列費用）</span><span class="v">0 元</span></div>';
+      }
+    } else {
+      feeRows = `<div class="prow"><span class="k">費用（按成交價3%計列，上限30萬元）</span><span class="v">${fmt(ctx.feeTotal)}</span></div>`;
+    }
+
+    const selfUse = ctx.entity === 'individual' ? isSelfUseQualified() : false;
+    const involuntary = $('involuntaryToggle').checked;
+
+    let identityRows = `<div class="prow"><span class="k">納稅義務人身分</span><span class="v">${ctx.entity === 'company' ? '營利事業' : '個人'}</span></div>`;
+    if(ctx.entity === 'individual'){
+      identityRows += `<div class="prow"><span class="k">自住資格</span><span class="v">${selfUse ? '符合（適用自住優惠）' : '不符合'}</span></div>`;
+      if(involuntary){
+        identityRows += `<div class="prow"><span class="k">非自願性移轉</span><span class="v">是</span></div>`;
+      }
+    }
+
+    box.innerHTML = `
+      <h1>房地合一稅試算結果</h1>
+      <div class="meta">列印日期：${todayStr}</div>
+
+      <h2>交易資訊</h2>
+      <div class="prow"><span class="k">買進日期</span><span class="v">${$('buyDate').value || '—'}</span></div>
+      <div class="prow"><span class="k">賣出日期</span><span class="v">${$('sellDate').value || '—'}</span></div>
+      <div class="prow"><span class="k">持有期間</span><span class="v">${holdingYearsLabel(ctx.days)}</span></div>
+      <div class="prow"><span class="k">買進總價</span><span class="v">${fmt(ctx.buyPrice)}</span></div>
+      <div class="prow"><span class="k">賣出總價</span><span class="v">${fmt(ctx.sellPrice)}</span></div>
+      ${ctx.landInc > 0 ? `<div class="prow"><span class="k">土地漲價總數額</span><span class="v">${fmt(ctx.landInc)}</span></div>` : ''}
+
+      <h2>費用明細</h2>
+      ${feeRows}
+      <div class="prow"><span class="k"><strong>費用合計</strong></span><span class="v"><strong>${fmt(ctx.feeTotal)}</strong></span></div>
+
+      <h2>身分與適用條件</h2>
+      ${identityRows}
+
+      <h2>計算結果</h2>
+      <div class="highlight-block">
+        <div class="hstat"><div class="lab">總利潤（毛利）</div><div class="amt">${fmt(ctx.grossProfit)}</div></div>
+        <div class="hstat"><div class="lab">房地合一稅<br>（${ctx.rateLabel}）</div><div class="amt">${fmt(ctx.taxAmount)}</div></div>
+        <div class="hstat"><div class="lab">稅後淨利</div><div class="amt">${fmt(ctx.netProfit)}</div></div>
+      </div>
+
+      <div class="footer-note">
+        本試算結果僅供參考，實際稅額請以國稅局核定為準。<br>
+        ${(()=>{ const info = loadFooterInfo(); return `${info.agentStoreName}　${info.agentName}　${info.agentBrokerInfo}`; })()}
+        <div class="disclaimer">本表由房地合一稅試算工具自動生成　列印時間：${new Date().toLocaleString('zh-TW')}</div>
+      </div>
+    `;
+  }
+
+  $('exportPdfBtn').addEventListener('click', ()=>{
+    calculate();
+    window.print();
+  });
+
+  // ---- 經紀人資訊（localStorage，每台裝置各自記住） ----
+  const FOOTER_DEFAULTS = {
+    agentStoreName: '台灣房屋捷運樂善直營店',
+    agentName: '劉昭佑',
+    agentBrokerInfo: '經紀人 康博超 桃市經字第001240號'
+  };
+  const FOOTER_STORAGE_KEY = 'leshanTaxCalc_agentInfo';
+
+  function loadFooterInfo(){
+    let saved = {};
+    try{
+      const raw = localStorage.getItem(FOOTER_STORAGE_KEY);
+      if(raw) saved = JSON.parse(raw);
+    } catch(e){ /* localStorage 不可用時，直接使用預設值 */ }
+    return {
+      agentStoreName: saved.agentStoreName || FOOTER_DEFAULTS.agentStoreName,
+      agentName: saved.agentName || FOOTER_DEFAULTS.agentName,
+      agentBrokerInfo: saved.agentBrokerInfo || FOOTER_DEFAULTS.agentBrokerInfo
+    };
+  }
+
+  function renderFooterDisplay(){
+    const info = loadFooterInfo();
+    $('footerDisplay').innerHTML = `本試算結果僅供參考，實際稅額請以國稅局核定為準。<br>${info.agentStoreName}　${info.agentName}　${info.agentBrokerInfo}`;
+  }
+
+  $('footerEditLink').addEventListener('click', ()=>{
+    const info = loadFooterInfo();
+    $('agentStoreName').value = info.agentStoreName;
+    $('agentName').value = info.agentName;
+    $('agentBrokerInfo').value = info.agentBrokerInfo;
+    $('footerEditBox').style.display = 'block';
+    $('footerEditLink').style.display = 'none';
+  });
+
+  $('footerSaveBtn').addEventListener('click', ()=>{
+    const info = {
+      agentStoreName: $('agentStoreName').value.trim() || FOOTER_DEFAULTS.agentStoreName,
+      agentName: $('agentName').value.trim() || FOOTER_DEFAULTS.agentName,
+      agentBrokerInfo: $('agentBrokerInfo').value.trim() || FOOTER_DEFAULTS.agentBrokerInfo
+    };
+    try{
+      localStorage.setItem(FOOTER_STORAGE_KEY, JSON.stringify(info));
+    } catch(e){ /* 無法儲存時，本次顯示仍會套用，但下次開啟會回復預設值 */ }
+    renderFooterDisplay();
+    $('footerEditBox').style.display = 'none';
+    $('footerEditLink').style.display = 'inline-block';
+    calculate(); // 同步更新列印摘要中的經紀人資訊
+  });
+
+  renderFooterDisplay();
+  calculate();
+})();
+</script>
+</body>
+</html>

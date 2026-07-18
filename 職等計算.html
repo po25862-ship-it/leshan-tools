@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每月職等試算工具｜台灣房屋樂善店</title>
+<style>
+  :root{
+    --red:#a02020;
+    --red-dark:#7a1818;
+    --ink:#2b2622;
+    --paper:#faf7f0;
+    --line:#d9cfc0;
+    --line-soft:#ece5d8;
+    --warn:#b5651d;
+    --ok:#3a6b35;
+    --deficit:#a02020;
+    --up:#2f6b3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"PingFang TC","Heiti TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--red);
+    color:#fff;
+    padding:16px 16px 14px;
+    position:sticky;
+    top:0;
+    z-index:10;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  header h1{ margin:0; font-size:1.02rem; font-weight:700; letter-spacing:.5px; }
+  header p{ margin:4px 0 0; font-size:.76rem; opacity:.9; }
+  .wrap{ max-width:760px; margin:0 auto; padding:14px; }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-size:.92rem;
+    margin:0 0 8px;
+    color:var(--red-dark);
+    border-left:4px solid var(--red);
+    padding-left:8px;
+  }
+  details.rules summary{
+    cursor:pointer;
+    font-size:.84rem;
+    font-weight:600;
+    color:var(--red-dark);
+    padding:4px 0;
+  }
+  .rule-grid{ display:grid; grid-template-columns:1fr; gap:6px; margin-top:8px; font-size:.8rem; line-height:1.55; }
+  .rule-step{ background:var(--line-soft); border-radius:8px; padding:8px 10px; }
+  .rule-step b{ color:var(--red-dark); }
+
+  table.ranktable{ width:100%; border-collapse:collapse; font-size:.72rem; margin-top:8px; }
+  table.ranktable th,table.ranktable td{ border:1px solid var(--line); padding:4px 3px; text-align:center; }
+  table.ranktable th{ background:var(--line-soft); }
+  table.ranktable td.floor{ background:#fceeea; font-weight:700; }
+
+  .person{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:12px;
+    background:#fffdfa;
+  }
+  .person-top{ display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  .person-top input[type=text]{
+    flex:1; font-size:1rem; font-weight:700; border:none;
+    border-bottom:1px dashed var(--line); background:transparent; padding:4px 2px; color:var(--ink);
+  }
+  .del-btn{ border:none; background:none; color:#b5651d; font-size:1.2rem; line-height:1; padding:2px 6px; cursor:pointer; }
+
+  .section-label{
+    font-size:.74rem; font-weight:700; color:#8a6d4a; margin:10px 0 5px;
+    text-transform:none; letter-spacing:.5px;
+  }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+  .field-row.triple{ grid-template-columns:1fr 1fr 1fr; }
+  .field-row label{ font-size:.7rem; color:#7a7065; display:block; margin-bottom:2px; }
+  .field-row input{
+    width:100%; padding:8px 8px; border:1px solid var(--line); border-radius:6px;
+    font-size:.92rem; background:#fff;
+  }
+
+  .result{ margin-top:10px; padding:10px; border-radius:8px; background:var(--line-soft); font-size:.82rem; line-height:1.65; }
+  .result .row{ display:flex; justify-content:space-between; gap:8px; }
+  .result .row + .row{ margin-top:3px; }
+  .divider{ height:1px; background:var(--line); margin:7px 0; }
+  .tag{ display:inline-block; padding:1px 8px; border-radius:20px; font-size:.7rem; font-weight:700; color:#fff; }
+  .tag.ok{ background:var(--ok); }
+  .tag.warn{ background:var(--warn); }
+  .tag.deficit{ background:var(--deficit); }
+  .tag.up{ background:var(--up); }
+  .final-line{ font-weight:700; font-size:.9rem; margin-top:4px; }
+  .deficit-line{ color:var(--deficit); font-weight:700; }
+  .up-line{ color:var(--up); font-weight:700; }
+  .conflict-box{
+    margin-top:8px; padding:8px; border-radius:6px; background:#fff3e0; border:1px solid #e0a458; color:#8a5a1a; font-size:.78rem; font-weight:600;
+  }
+  .empty-hint{ color:#a39686; font-style:normal; font-size:.8rem; }
+
+  .btn-row{ display:flex; gap:10px; margin-top:8px; }
+  button.primary{ flex:1; background:var(--red); color:#fff; border:none; border-radius:8px; padding:11px; font-size:.92rem; font-weight:700; cursor:pointer; }
+  button.secondary{ flex:1; background:#fff; color:var(--red-dark); border:1px solid var(--red); border-radius:8px; padding:11px; font-size:.92rem; font-weight:700; cursor:pointer; }
+  button.apply{ flex:1; background:var(--up); color:#fff; border:none; border-radius:8px; padding:10px; font-size:.85rem; font-weight:700; cursor:pointer; margin-top:0; }
+  button.pdf-person{ flex:1; background:#fff; color:var(--red-dark); border:1px solid var(--red-dark); border-radius:8px; padding:10px; font-size:.82rem; font-weight:700; cursor:pointer; margin-top:0; }
+  .top-btn-row{ display:flex; gap:10px; margin-top:6px; }
+
+  .note{ font-size:.72rem; color:#8a8074; margin-top:10px; line-height:1.6; }
+  .save-status{ font-size:.72rem; color:#8a8074; text-align:center; margin-top:4px; min-height:14px; }
+  .invalid{ outline:2px solid var(--deficit); }
+  footer{ text-align:center; font-size:.72rem; color:#9a9085; padding:18px 14px 30px; }
+
+  /* ===== 列印 / PDF 專用樣式 ===== */
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; }
+    header, .wrap > .card, footer{ display:none !important; }
+  }
+  .print-page{
+    font-family:"PingFang TC","Heiti TC","Microsoft JhengHei",sans-serif;
+    color:#1a1a1a;
+    padding:14mm 12mm;
+    page-break-after:always;
+  }
+  .print-page:last-child{ page-break-after:auto; }
+  .print-title{ font-size:1.3rem; font-weight:700; color:#a02020; margin:0 0 2px; }
+  .print-sub{ font-size:.8rem; color:#555; margin:0 0 14px; }
+  table.print-table{ width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.print-table th, table.print-table td{ border:1px solid #999; padding:5px 6px; text-align:center; }
+  table.print-table th{ background:#eee2d8; }
+  table.print-table td.name-cell{ text-align:left; font-weight:700; }
+  .print-footer-sign{ margin-top:30px; font-size:.78rem; }
+  .print-section{ margin-top:14px; font-size:.82rem; line-height:1.7; }
+  .print-section h3{ font-size:.88rem; color:#a02020; border-left:4px solid #a02020; padding-left:6px; margin:14px 0 6px; }
+  .print-row{ display:flex; justify-content:space-between; border-bottom:1px dotted #ccc; padding:3px 0; }
+  .print-row .lbl{ color:#666; }
+  .print-final{ font-weight:700; font-size:.95rem; background:#fceeea; padding:8px 10px; border-radius:6px; margin-top:8px; }
+  .print-legal{ margin-top:24px; font-size:.74rem; color:#555; border-top:1px solid #ccc; padding-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- ===== 密碼保護遮罩 ===== -->
+<div id="pwGate" style="position:fixed;inset:0;z-index:99999;background:#2b2622;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'PingFang TC','Heiti TC','Microsoft JhengHei',-apple-system,sans-serif;">
+  <div style="background:#faf7f0;border-radius:12px;padding:32px 28px;max-width:340px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.3);">
+    <h2 style="margin:0 0 6px;font-size:1.05rem;color:#a02020;">🔒 每月職等試算工具</h2>
+    <p style="margin:0 0 16px;font-size:.8rem;color:#6b6357;">請輸入密碼以繼續</p>
+    <input type="password" id="pwInput" placeholder="密碼" style="width:100%;border:1px solid #d9cfc0;border-radius:7px;padding:10px 12px;font-size:.95rem;box-sizing:border-box;margin-bottom:10px;">
+    <button id="pwSubmit" style="width:100%;background:#a02020;color:#fff;border:none;border-radius:7px;padding:10px;font-size:.9rem;font-weight:700;cursor:pointer;">進入</button>
+    <div id="pwError" style="color:#a02020;font-size:.78rem;margin-top:8px;display:none;">密碼錯誤，請再試一次。</div>
+  </div>
+</div>
+<script>
+(function(){
+  var PW_KEY = 'leshanRankCalc_pw';
+  var DEFAULT_PW = '3288283';
+  function getPw(){
+    try{ return localStorage.getItem(PW_KEY) || DEFAULT_PW; }catch(e){ return DEFAULT_PW; }
+  }
+  var gate = document.getElementById('pwGate');
+  var input = document.getElementById('pwInput');
+  var submitBtn = document.getElementById('pwSubmit');
+  var errBox = document.getElementById('pwError');
+
+  function tryUnlock(){
+    if(input.value === getPw()){
+      gate.style.display = 'none';
+      try{ sessionStorage.setItem('leshanRankCalc_unlocked', '1'); }catch(e){}
+    } else {
+      errBox.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+  try{
+    if(sessionStorage.getItem('leshanRankCalc_unlocked') === '1'){
+      gate.style.display = 'none';
+    }
+  }catch(e){}
+  submitBtn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+})();
+</script>
+
+<header>
+  <h1>每月職等試算工具</h1>
+  <p>台灣房屋捷運樂善直營店｜業績升等・進案警告・責任額降級 三軌並算</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <details class="rules">
+      <summary>三條規則說明（點此展開／收合）</summary>
+      <div class="rule-grid">
+        <div class="rule-step"><b>① 業績面（升等／升級）：</b>當月收款達到下一級門檻即升一級（單一數字）。若要單月跳2級（上限），要達到「目前級門檻＋下一級門檻」相加的金額，不是只看跳過去那一格的數字。換職稱（等）也用同樣加總方式：現職稱5級門檻＋下一職稱1級門檻相加才換等。經紀人員8等3級當月達45萬以上，直接跳9等1級（公司固定特例，不套用加總公式）。</div>
+        <div class="rule-step"><b>② 進案面（警告）：</b>依當月業績分3個門檻決定專任／一般進案目標件數（&lt;10萬：專3+一般1／10~30萬：專2+一般1／≥30萬：專1+一般1）。缺1件專任記2支警告，缺1件一般記1支警告（按比例，缺0.5件給一半）。</div>
+        <div class="rule-step"><b>③ 警告換算：</b>每滿3支警告＝1支申誡；每滿3支申誡（＝9支警告）＝降1等，職稱依下表自動換算，底限為經紀人員8等3級，超出部分記「欠等」。</div>
+        <div class="rule-step"><b>④ 責任額面（降級）：</b>責任額固定1萬／月，當月業績為0（短少達1萬以上）即直接降1級，沿整條職等階梯往下遞補，底限同為8等3級，超出部分記「欠級」。</div>
+      </div>
+      <table class="ranktable">
+        <tr><th>代碼前2碼</th><th>15</th><th>14</th><th>13</th><th>12</th><th>11</th><th>10</th><th>09</th><th>08</th></tr>
+        <tr><th>職稱</th><td>副總經理</td><td>協理</td><td>經理</td><td>副理</td><td>襄理</td><td>主任</td><td>副主任</td><td class="floor">經紀人員(底限)</td></tr>
+      </table>
+      <table class="ranktable" style="margin-top:10px;">
+        <tr><th>本薪\級</th><th>1級</th><th>2級</th><th>3級</th><th>4級</th><th>5級</th></tr>
+        <tr><th>副總經理</th><td>46200</td><td>47300</td><td>48300</td><td>50500</td><td>51500</td></tr>
+        <tr><th>協理</th><td>42500</td><td>43500</td><td>44500</td><td>45500</td><td>46000</td></tr>
+        <tr><th>經理</th><td>40000</td><td>40500</td><td>41000</td><td>41500</td><td>42000</td></tr>
+        <tr><th>副理</th><td>36800</td><td>37300</td><td>37800</td><td>38500</td><td>39000</td></tr>
+        <tr><th>襄理</th><td>34700</td><td>35200</td><td>35500</td><td>35700</td><td>36300</td></tr>
+        <tr><th>主任</th><td>33200</td><td>33400</td><td>33600</td><td>34000</td><td>34200</td></tr>
+        <tr><th>副主任</th><td>32200</td><td>32400</td><td>32600</td><td>32800</td><td>33000</td></tr>
+        <tr><th>經紀人員</th><td>—</td><td>—</td><td>31500</td><td>31900</td><td>32100</td></tr>
+      </table>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>同仁名單／本月試算</h2>
+    <div id="personList"></div>
+    <div class="top-btn-row">
+      <button class="secondary" id="addBtn">＋ 新增同仁</button>
+      <button class="primary" id="calcBtn">重新試算全部</button>
+    </div>
+    <div class="top-btn-row">
+      <button class="primary" id="pdfAllBtn">📄 輸出全體一覽表 PDF</button>
+    </div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+
+  <div class="card">
+    <h2>備份與歷史紀錄</h2>
+    <div class="top-btn-row">
+      <button class="secondary" id="exportJsonBtn">💾 匯出備份(JSON)</button>
+      <button class="secondary" id="importJsonBtn">📂 匯入備份(JSON)</button>
+    </div>
+    <input type="file" id="importJsonFile" accept="application/json" style="display:none;">
+    <div class="top-btn-row">
+      <button class="secondary" id="exportHistoryBtn">📊 下載歷史異動紀錄(Excel/CSV)</button>
+    </div>
+    <div class="save-status" id="backupStatus"></div>
+  </div>
+
+  <div class="note">
+    說明：「目前職等代碼」「累計警告」「累計欠等」「累計欠級」是跨月持續累積的狀態，平時不需要動；每月只要填「本月業績」「本月實際專任進案件數」「本月實際一般進案件數」三格，按「套用本月並結算」就會自動往下月推進，並把這三格清空準備下次使用。<br><br>
+    業績面升等與進案面警告是分開計算的（公司文件沒寫兩者同時成立時誰優先），若同月兩者方向相反（例如業績達標可升、但進案缺額又達降等門檻），會特別標示，請自行確認最終結果再手動調整「目前職等代碼」。<br><br>
+    薪資目前只顯示「本薪」（依職等代碼直接對照表格），業績獎金（中階8.3-8.5／高階9.1含店長以上）尚未納入計算，待規則確認後再加入。<br><br>
+    資料儲存說明：所有資料平時自動儲存在這個工具專屬的雲端空間，只有您自己看得到；但如果之後這個工具被刪除或換成新版本，舊資料不會自動帶過去。建議定期按「💾 匯出備份(JSON)」下載存到 iCloud，需要還原時用「📂 匯入備份(JSON)」讀回即可。每次按「套用本月並結算」都會自動留一筆歷史紀錄，可隨時按「📊 下載歷史異動紀錄」匯出成 CSV（可直接用 Excel 開啟），方便留存考核憑證。
+  </div>
+
+</div>
+
+<footer>台灣房屋捷運樂善直營店 劉昭佑｜經紀人 康博超 桃市經字第001240號</footer>
+
+<div id="printArea"></div>
+
+<script>
+const TITLES = {15:'副總經理',14:'協理',13:'經理',12:'副理',11:'襄理',10:'主任',9:'副主任',8:'經紀人員'};
+const FLOOR_RANK = 8;
+const FLOOR_LEVEL_MIN = 3;
+const THRESHOLDS = {
+  15:{1:70,2:75,3:80,4:85,5:100},
+  14:{1:60,2:70,3:75,4:80,5:90},
+  13:{1:50,2:55,3:60,4:70,5:80},
+  12:{1:40,2:40,3:50,4:60,5:70},
+  11:{1:40,2:40,3:50,4:60,5:70},
+  10:{1:30,2:30,3:40,4:45,5:50},
+  9: {1:20,2:25,3:30,4:35,5:40},
+  8: {3:10,4:15,5:20}
+};
+const SALARY = {
+  15:{1:46200,2:47300,3:48300,4:50500,5:51500},
+  14:{1:42500,2:43500,3:44500,4:45500,5:46000},
+  13:{1:40000,2:40500,3:41000,4:41500,5:42000},
+  12:{1:36800,2:37300,3:37800,4:38500,5:39000},
+  11:{1:34700,2:35200,3:35500,4:35700,5:36300},
+  10:{1:33200,2:33400,3:33600,4:34000,5:34200},
+  9: {1:32200,2:32400,3:32600,4:32800,5:33000},
+  8: {3:31500,4:31900,5:32100}
+};
+function getSalary(rank, level){
+  const row = SALARY[rank];
+  return row ? row[level] : undefined;
+}
+const STORAGE_KEY = 'leshan-rank-roster-v2';
+
+function buildLadder(){
+  const ladder = [];
+  for(let r=8;r<=15;r++){
+    const levels = (r===8) ? [3,4,5] : [1,2,3,4,5];
+    for(const l of levels) ladder.push([r,l]);
+  }
+  return ladder;
+}
+const LADDER = buildLadder();
+function ladderIndex(rank,level){
+  return LADDER.findIndex(([r,l]) => r===rank && l===level);
+}
+function ladderStepDown(rank, level, steps){
+  const idx = ladderIndex(rank, level);
+  if(idx < 0) return null;
+  let newIdx = idx - steps;
+  let deficit = 0;
+  if(newIdx < 0){ deficit = -newIdx; newIdx = 0; }
+  return {rank:LADDER[newIdx][0], level:LADDER[newIdx][1], deficit};
+}
+
+const defaultPeople = [
+  {name:'陳筱涵', code:'0803', cumWarnings:'2.5', rankDeficit:'0', levelDeficit:'0', revenue:'', actEx:'', actGe:''},
+  {name:'胡哲嘉', code:'0904', cumWarnings:'4.5', rankDeficit:'0', levelDeficit:'0', revenue:'', actEx:'', actGe:''},
+  {name:'董韋伶', code:'0805', cumWarnings:'4',   rankDeficit:'0', levelDeficit:'0', revenue:'', actEx:'', actGe:''},
+  {name:'李慶祥', code:'0803', cumWarnings:'0.5', rankDeficit:'10',levelDeficit:'0', revenue:'', actEx:'', actGe:''},
+  {name:'吳采萱', code:'0902', cumWarnings:'1',   rankDeficit:'0', levelDeficit:'0', revenue:'', actEx:'', actGe:''},
+];
+
+let people = [];
+let historyLog = [];
+const HISTORY_KEY = 'leshan-rank-history-v1';
+
+function parseCode(code){
+  const m = /^(\d{2})(\d{2})$/.exec((code||'').trim());
+  if(!m) return null;
+  const rank = parseInt(m[1],10);
+  const level = parseInt(m[2],10);
+  if(!(rank in TITLES)) return null;
+  if(level < 1 || level > 5) return null;
+  if(rank === FLOOR_RANK && level < FLOOR_LEVEL_MIN) return null;
+  return {rank, level};
+}
+function formatCode(rank, level){ return String(rank).padStart(2,'0') + String(level).padStart(2,'0'); }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function calcPerformance(rank, level, revenue){
+  // 特殊跳等：經紀人員3級當月達45萬以上，直接晉升副主任1級（公司明定的固定門檻，不套用加總公式）
+  if(rank===8 && level===3 && revenue>=45){
+    return {newRank:9, newLevel:1, changed:true, note:`特殊跳等：經紀人員3級當月達${revenue}萬（≥45萬），直接晉升副主任1級`};
+  }
+
+  const table = THRESHOLDS[rank];
+
+  if(level < 5){
+    const t1 = table[level+1]; // 升1級所需門檻（下一級單一門檻）
+    if(t1 === undefined){
+      return {newRank:rank, newLevel:level, changed:false, note:'查無下一級門檻資料'};
+    }
+    if(revenue >= t1){
+      // 至少可升1級，再檢查是否達到跳2級的加總門檻
+      if(level + 2 <= 5){
+        const tCurrent = table[level];
+        const doubleNeeded = +(tCurrent + t1).toFixed(2);
+        if(revenue >= doubleNeeded){
+          return {newRank:rank, newLevel:level+2, changed:true,
+            note:`本月業績${revenue}萬，達「${level}級門檻${tCurrent}+${level+1}級門檻${t1}=${doubleNeeded}萬」加總門檻，升2級至${level+2}級`};
+        }
+      }
+      return {newRank:rank, newLevel:level+1, changed:true,
+        note:`本月業績${revenue}萬，達${level+1}級門檻${t1}萬，升1級（若要升2級需達${table[level]}+${t1}=${+(table[level]+t1).toFixed(2)}萬）`};
+    }
+    return {newRank:rank, newLevel:level, changed:false,
+      note:`本月業績${revenue}萬，未達${level+1}級門檻${t1}萬`};
+  } else {
+    // level===5：換職稱（等），同樣用「現職稱5級門檻＋下一職稱1級門檻」加總公式
+    if(rank>=15) return {newRank:rank, newLevel:level, changed:false, note:'已達最高職等（副總經理5級）'};
+    const ownTop = table[5];
+    const nextTable = THRESHOLDS[rank+1];
+    const nextT1 = nextTable[1];
+    const crossNeeded = +(ownTop + nextT1).toFixed(2);
+    if(revenue >= crossNeeded){
+      // 跨等成功後，本月若還有餘力達到新職稱2級的單一門檻，可多跳1級（跨等本身算1級，再跳1級＝用完最多2級額度）
+      const nextT2 = nextTable[2];
+      if(nextT2 !== undefined && revenue >= nextT2){
+        return {newRank:rank+1, newLevel:2, changed:true,
+          note:`已在${TITLES[rank]}5級，本月業績${revenue}萬，達跨等門檻(${ownTop}+${nextT1}=${crossNeeded}萬)，且業績亦達${TITLES[rank+1]}2級門檻${nextT2}萬，跨等後再升1級，共至${TITLES[rank+1]}2級`};
+      }
+      return {newRank:rank+1, newLevel:1, changed:true,
+        note:`已在${TITLES[rank]}5級，本月業績${revenue}萬，達「現職稱5級${ownTop}+${TITLES[rank+1]}1級${nextT1}=${crossNeeded}萬」加總門檻，升等至${TITLES[rank+1]}1級`};
+    }
+    return {newRank:rank, newLevel:level, changed:false,
+      note:`已在${TITLES[rank]}5級，本月業績${revenue}萬，未達升等門檻（需${crossNeeded}萬＝現職稱5級${ownTop}+${TITLES[rank+1]}1級${nextT1}）`};
+  }
+}
+
+function calcListingShortfall(revenue, actEx, actGe){
+  let target;
+  if(revenue<10) target={ex:3,ge:1};
+  else if(revenue<30) target={ex:2,ge:1};
+  else target={ex:1,ge:1};
+  const exShort = Math.max(0, target.ex-actEx);
+  const geShort = Math.max(0, target.ge-actGe);
+  const newWarnings = +(exShort*2 + geShort*1).toFixed(2);
+  return {target, exShort, geShort, newWarnings};
+}
+
+function calcWarningDemotion(rank, level, cumWarnings, newWarnings){
+  const totalWarnings = +(cumWarnings + newWarnings).toFixed(2);
+  const reprimands = Math.floor(totalWarnings/3 + 1e-9);
+  const rankDemotions = Math.floor(reprimands/3 + 1e-9);
+  const reprimandsLeftover = reprimands - rankDemotions*3;
+  const spentWarnings = rankDemotions*9;
+  const leftoverWarnings = +(totalWarnings - spentWarnings).toFixed(2);
+
+  // 降「等」＝沿職等階梯（LADDER，含每個職稱的1~5級）往下走 rankDemotions 步
+  // 例：副主任2級(0902)降1等 -> 副主任1級(0901)；副主任1級(0901)降1等 -> 經紀人員5級(0805)
+  const stepped = ladderStepDown(rank, level, rankDemotions);
+  const newRank = stepped.rank;
+  const newLevel = stepped.level;
+  const deficit = stepped.deficit; // 已觸底(0803)後，超出的部分
+
+  return {totalWarnings, reprimands, rankDemotions, deficit, newRank, newLevel, levelDeficitFromThis:0, leftoverWarnings, reprimandsLeftover};
+}
+
+function calcResponsibility(rank, level, revenue){
+  const QUOTA = 1;
+  const shortfall = Math.max(0, QUOTA - revenue);
+  if(shortfall >= QUOTA){
+    const r = ladderStepDown(rank, level, 1);
+    return {triggered:true, rank:r.rank, level:r.level, deficit:r.deficit};
+  }
+  return {triggered:false, rank, level, deficit:0};
+}
+
+function calcOne(p){
+  const parsed = parseCode(p.code);
+  const cumW = parseFloat(p.cumWarnings);
+  const rankDef = parseFloat(p.rankDeficit) || 0;
+  const levelDef = parseFloat(p.levelDeficit) || 0;
+  if(!parsed || isNaN(cumW) || cumW < 0){
+    return {error:true};
+  }
+  const hasMonthData = (p.revenue !== '' && p.revenue !== null && p.revenue !== undefined);
+  const revenue = hasMonthData ? parseFloat(p.revenue) : null;
+  const actEx = parseFloat(p.actEx) || 0;
+  const actGe = parseFloat(p.actGe) || 0;
+
+  const base = {oldTitle:TITLES[parsed.rank], oldCode:formatCode(parsed.rank, parsed.level), rankDeficitPrev:rankDef, levelDeficitPrev:levelDef};
+
+  if(!hasMonthData || isNaN(revenue)){
+    return {...base, error:false, noMonthData:true};
+  }
+
+  // STEP 1: 業績面
+  const perf = calcPerformance(parsed.rank, parsed.level, revenue);
+
+  // STEP 2: 進案缺額 -> 新增警告 -> 警告面（疊加在業績面結果之上）
+  const listing = calcListingShortfall(revenue, actEx, actGe);
+  const warn = calcWarningDemotion(perf.newRank, perf.newLevel, cumW, listing.newWarnings);
+
+  // STEP 3: 責任額面（疊加在警告面結果之上）
+  const resp = calcResponsibility(warn.newRank, warn.newLevel, revenue);
+
+  const finalRank = resp.triggered ? resp.rank : warn.newRank;
+  const finalLevel = resp.triggered ? resp.level : warn.newLevel;
+  const finalRankDeficit = rankDef + warn.deficit;
+  const finalLevelDeficit = levelDef + warn.levelDeficitFromThis + (resp.deficit||0);
+
+  const conflict = perf.changed && (warn.rankDemotions>0 || resp.triggered);
+
+  return {
+    ...base, error:false, noMonthData:false,
+    revenue, listing, perf, warn, resp,
+    finalRank, finalLevel, finalCode: formatCode(finalRank, finalLevel), finalTitle: TITLES[finalRank],
+    finalRankDeficit, finalLevelDeficit,
+    leftoverWarnings: warn.leftoverWarnings,
+    conflict,
+  };
+}
+
+function buildResultHtml(p, idx, r){
+  if(r.error){
+    return `<div class="deficit-line">職等代碼或累計警告格式有誤，請確認（如 0902、4.5）</div>`;
+  }
+  if(r.noMonthData){
+    const cur = parseCode(p.code);
+    const curSalary = cur ? getSalary(cur.rank, cur.level) : undefined;
+    return `<div class="empty-hint">目前：${r.oldTitle}（${r.oldCode}）｜本薪 ${curSalary!==undefined ? curSalary.toLocaleString()+'元' : '—'}｜累計警告 ${p.cumWarnings}、欠等 ${p.rankDeficit}、欠級 ${p.levelDeficit}<br>尚未輸入本月業績，請填入下方三格後試算。</div>`;
+  }
+  const oldSalary = getSalary(parseCode(r.oldCode).rank, parseCode(r.oldCode).level);
+  const newSalary = getSalary(r.finalRank, r.finalLevel);
+  const salaryDiff = (newSalary!==undefined && oldSalary!==undefined) ? newSalary - oldSalary : null;
+  return `
+    <div class="row"><span>目前：${r.oldTitle}（${r.oldCode}）</span><span>本月業績 ${r.revenue} 萬</span></div>
+    <div class="row"><span>目前本薪</span><span>${oldSalary!==undefined ? oldSalary.toLocaleString()+'元' : '—'}</span></div>
+    <div class="divider"></div>
+    <div class="row"><span>① 業績面</span><span>${r.perf.changed ? `<span class="tag up">可升至 ${TITLES[r.perf.newRank]}${formatCode(r.perf.newRank,r.perf.newLevel)}</span>` : '<span class="tag ok">未達升級門檻</span>'}</span></div>
+    <div class="row"><span style="flex:1;color:#7a7065;font-size:.76rem;">${r.perf.note}</span></div>
+    <div class="divider"></div>
+    <div class="row"><span>② 進案缺額</span><span>專任缺${r.listing.exShort}件・一般缺${r.listing.geShort}件</span></div>
+    <div class="row"><span>新增警告</span><span>+${r.listing.newWarnings}（目標：專${r.listing.target.ex}+一般${r.listing.target.ge}）</span></div>
+    <div class="row"><span>累計警告(含本月)</span><span>${r.warn.totalWarnings} → 申誡${r.warn.reprimands}支(餘${r.warn.reprimandsLeftover})</span></div>
+    <div class="row"><span>本月降等</span><span>${r.warn.rankDemotions} 等${r.warn.deficit>0 ? `（含欠等 ${r.warn.deficit}）`:''}</span></div>
+    <div class="divider"></div>
+    <div class="row"><span>③ 責任額</span><span>${r.resp.triggered ? '<span class="tag deficit">業績為0，降1級</span>' : '<span class="tag ok">已達1萬，正常</span>'}</span></div>
+    ${r.resp.triggered && r.resp.deficit>0 ? `<div class="row deficit-line"><span></span><span>已觸底，欠級 +${r.resp.deficit}</span></div>` : ''}
+    <div class="divider"></div>
+    <div class="row final-line ${r.finalCode !== r.oldCode ? (r.finalRank+r.finalLevel/10 > parseCode(r.oldCode).rank+parseCode(r.oldCode).level/10 ? 'up-line':'deficit-line') : ''}">
+      <span>下月建議職等</span><span>${r.finalTitle}（${r.finalCode}）</span>
+    </div>
+    <div class="row final-line ${salaryDiff>0?'up-line':(salaryDiff<0?'deficit-line':'')}">
+      <span>下月本薪</span><span>${newSalary!==undefined ? newSalary.toLocaleString()+'元' : '—'}${salaryDiff ? `（${salaryDiff>0?'+':''}${salaryDiff.toLocaleString()}）` : ''}</span>
+    </div>
+    ${(r.finalRankDeficit>0 || r.finalLevelDeficit>0) ? `<div class="row deficit-line"><span>累計欠等/欠級</span><span>${r.finalRankDeficit}等 / ${r.finalLevelDeficit}級</span></div>` : ''}
+    <div class="row"><span>結算後剩餘警告</span><span>${r.leftoverWarnings}（下月起算）</span></div>
+    ${r.conflict ? `<div class="conflict-box">⚠ 業績達標可升等，但同月進案缺額／責任額又使職等下修——方向相反，已依「業績→警告→責任額」順序疊加計算，請自行確認是否符合公司意圖。</div>` : ''}
+  `;
+}
+
+// 只更新單一同仁的「結果區+套用按鈕」，完全不動輸入框，避免打字時焦點被重建打斷
+function updateResult(idx){
+  const p = people[idx];
+  if(!p) return;
+  const r = calcOne(p);
+  const dyn = document.getElementById(`dyn-${idx}`);
+  if(!dyn) return;
+  dyn.innerHTML = `
+    <div class="result">${buildResultHtml(p, idx, r)}</div>
+    <div class="btn-row">
+      ${(!r.error && !r.noMonthData) ? `<button class="apply" data-idx="${idx}">套用本月並結算</button>` : ''}
+      ${(!r.error) ? `<button class="pdf-person" data-idx="${idx}">📄 個人詳細報告 PDF</button>` : ''}
+    </div>
+  `;
+  const applyBtn = dyn.querySelector('.apply');
+  if(applyBtn) applyBtn.addEventListener('click', () => applyMonth(idx));
+  const pdfBtn = dyn.querySelector('.pdf-person');
+  if(pdfBtn) pdfBtn.addEventListener('click', () => exportPersonPdf(idx));
+
+  // 同步輸入框的錯誤outline，不重建輸入框本身
+  const card = document.getElementById(`person-${idx}`);
+  if(card){
+    const codeInput = card.querySelector('[data-field="code"]');
+    const warnInput = card.querySelector('[data-field="cumWarnings"]');
+    if(codeInput) codeInput.classList.toggle('invalid', !!r.error);
+    if(warnInput) warnInput.classList.toggle('invalid', !!r.error);
+  }
+}
+
+function render(){
+  const list = document.getElementById('personList');
+  list.innerHTML = '';
+  people.forEach((p, idx) => {
+    const div = document.createElement('div');
+    div.className = 'person';
+    div.id = `person-${idx}`;
+
+    div.innerHTML = `
+      <div class="person-top">
+        <input type="text" value="${escapeHtml(p.name)}" data-idx="${idx}" data-field="name" placeholder="姓名">
+        <button class="del-btn" data-idx="${idx}" title="刪除">✕</button>
+      </div>
+
+      <div class="section-label">目前狀態（跨月累積，平時不需更動）</div>
+      <div class="field-row triple">
+        <div><label>職等代碼</label><input type="text" inputmode="numeric" maxlength="4" value="${escapeHtml(p.code)}" data-idx="${idx}" data-field="code"></div>
+        <div><label>累計警告</label><input type="text" inputmode="decimal" value="${escapeHtml(p.cumWarnings)}" data-idx="${idx}" data-field="cumWarnings"></div>
+        <div></div>
+      </div>
+      <div class="field-row">
+        <div><label>累計欠等</label><input type="text" inputmode="decimal" value="${escapeHtml(p.rankDeficit)}" data-idx="${idx}" data-field="rankDeficit"></div>
+        <div><label>累計欠級</label><input type="text" inputmode="decimal" value="${escapeHtml(p.levelDeficit)}" data-idx="${idx}" data-field="levelDeficit"></div>
+      </div>
+
+      <div class="section-label">本月輸入</div>
+      <div class="field-row triple">
+        <div><label>本月業績(萬)</label><input type="text" inputmode="decimal" value="${escapeHtml(p.revenue)}" data-idx="${idx}" data-field="revenue" placeholder="例 28"></div>
+        <div><label>實際專任件數</label><input type="text" inputmode="decimal" value="${escapeHtml(p.actEx)}" data-idx="${idx}" data-field="actEx" placeholder="例 1"></div>
+        <div><label>實際一般件數</label><input type="text" inputmode="decimal" value="${escapeHtml(p.actGe)}" data-idx="${idx}" data-field="actGe" placeholder="例 0"></div>
+      </div>
+
+      <div id="dyn-${idx}"></div>
+    `;
+    list.appendChild(div);
+    updateResult(idx);
+  });
+
+  list.querySelectorAll('input').forEach(inp => inp.addEventListener('input', onFieldChange));
+  list.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => {
+    people.splice(parseInt(btn.dataset.idx,10), 1);
+    render(); save();
+  }));
+}
+
+function applyMonth(idx){
+  const p = people[idx];
+  const r = calcOne(p);
+  if(r.error || r.noMonthData) return;
+
+  const cur = parseCode(p.code);
+  const oldSalary = cur ? getSalary(cur.rank, cur.level) : undefined;
+  const newSalary = getSalary(r.finalRank, r.finalLevel);
+
+  historyLog.push({
+    date: todayStr(),
+    name: p.name,
+    oldCode: r.oldCode,
+    oldTitle: r.oldTitle,
+    newCode: r.finalCode,
+    newTitle: r.finalTitle,
+    oldSalary: oldSalary!==undefined?oldSalary:'',
+    newSalary: newSalary!==undefined?newSalary:'',
+    revenue: r.revenue,
+    perfChanged: r.perf.changed ? '是' : '否',
+    perfNote: r.perf.note,
+    listingShortEx: r.listing.exShort,
+    listingShortGe: r.listing.geShort,
+    newWarnings: r.listing.newWarnings,
+    totalWarnings: r.warn.totalWarnings,
+    rankDemotions: r.warn.rankDemotions,
+    respTriggered: r.resp.triggered ? '是' : '否',
+    finalRankDeficit: r.finalRankDeficit,
+    finalLevelDeficit: r.finalLevelDeficit,
+    leftoverWarnings: r.leftoverWarnings,
+  });
+
+  p.code = r.finalCode;
+  p.cumWarnings = String(r.leftoverWarnings);
+  p.rankDeficit = String(r.finalRankDeficit);
+  p.levelDeficit = String(r.finalLevelDeficit);
+  p.revenue = '';
+  p.actEx = '';
+  p.actGe = '';
+  render();
+  save();
+  saveHistory();
+}
+
+function onFieldChange(e){
+  const idx = parseInt(e.target.dataset.idx, 10);
+  const field = e.target.dataset.field;
+  people[idx][field] = e.target.value;
+  updateResult(idx); // 立刻更新結果，不動輸入框，焦點不會跑掉
+  clearTimeout(window.__saveTimer);
+  window.__saveTimer = setTimeout(save, 600); // 只延後「存檔」，不延後畫面更新
+}
+
+async function save(){
+  const status = document.getElementById('saveStatus');
+  try{
+    const r = await window.storage.set(STORAGE_KEY, JSON.stringify(people), false);
+    status.textContent = r ? ('已自動儲存 ' + new Date().toLocaleTimeString('zh-TW')) : '儲存失敗，請稍後再試';
+  }catch(err){
+    status.textContent = '儲存失敗：' + err.message;
+  }
+}
+async function load(){
+  try{
+    const r = await window.storage.get(STORAGE_KEY, false);
+    if(r && r.value){ people = JSON.parse(r.value); return; }
+  }catch(err){ /* 沒有存過資料，使用預設名單 */ }
+  people = defaultPeople.map(p => ({...p}));
+}
+
+async function saveHistory(){
+  const status = document.getElementById('backupStatus');
+  try{
+    const r = await window.storage.set(HISTORY_KEY, JSON.stringify(historyLog), false);
+    if(status) status.textContent = r ? ('歷史紀錄已更新 ' + new Date().toLocaleTimeString('zh-TW')) : '歷史紀錄儲存失敗';
+  }catch(err){
+    if(status) status.textContent = '歷史紀錄儲存失敗：' + err.message;
+  }
+}
+async function loadHistory(){
+  try{
+    const r = await window.storage.get(HISTORY_KEY, false);
+    if(r && r.value){ historyLog = JSON.parse(r.value); return; }
+  }catch(err){ /* 尚無歷史紀錄 */ }
+  historyLog = [];
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  people.push({name:'', code:'0803', cumWarnings:'0', rankDeficit:'0', levelDeficit:'0', revenue:'', actEx:'', actGe:''});
+  render(); save();
+});
+document.getElementById('calcBtn').addEventListener('click', () => { render(); });
+document.getElementById('pdfAllBtn').addEventListener('click', exportAllPdf);
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+const LEGAL_FOOTER = '台灣房屋捷運樂善直營店 劉昭佑｜經紀人 康博超 桃市經字第001240號';
+
+function triggerPrint(html){
+  const area = document.getElementById('printArea');
+  area.innerHTML = html;
+  // 讓瀏覽器先完成排版再呼叫列印（手機上常見的時序問題）
+  setTimeout(() => {
+    window.print();
+  }, 150);
+}
+
+// ===== 全體一覽表 PDF =====
+function exportAllPdf(){
+  const rows = people.map(p => {
+    const r = calcOne(p);
+    if(r.error){
+      return `<tr><td class="name-cell">${escapeHtml(p.name)}</td><td colspan="5">資料格式有誤</td></tr>`;
+    }
+    const cur = parseCode(p.code);
+    const curSalary = cur ? getSalary(cur.rank, cur.level) : undefined;
+    if(r.noMonthData){
+      return `<tr>
+        <td class="name-cell">${escapeHtml(p.name)}</td>
+        <td>${r.oldTitle}（${r.oldCode}）</td>
+        <td>${curSalary!==undefined?curSalary.toLocaleString():'—'}</td>
+        <td colspan="2">本月尚未輸入業績</td>
+        <td>${p.cumWarnings}</td>
+      </tr>`;
+    }
+    const newSalary = getSalary(r.finalRank, r.finalLevel);
+    return `<tr>
+      <td class="name-cell">${escapeHtml(p.name)}</td>
+      <td>${r.oldTitle}（${r.oldCode}）→ ${r.finalTitle}（${r.finalCode}）</td>
+      <td>${curSalary!==undefined?curSalary.toLocaleString():'—'} → ${newSalary!==undefined?newSalary.toLocaleString():'—'}</td>
+      <td>${r.revenue} 萬</td>
+      <td>${r.warn.rankDemotions>0 ? `降${r.warn.rankDemotions}等` : (r.perf.changed ? '升等/升級' : '持平')}${r.resp.triggered?'+責任額降級':''}</td>
+      <td>${r.leftoverWarnings}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    <div class="print-page">
+      <div class="print-title">同仁職等／薪資異動一覽表</div>
+      <div class="print-sub">台灣房屋捷運樂善直營店｜製表日期：${todayStr()}</div>
+      <table class="print-table">
+        <thead>
+          <tr><th>姓名</th><th>職等異動</th><th>本薪異動(元)</th><th>本月業績</th><th>異動結果</th><th>剩餘警告</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="print-footer-sign">
+        製表人：劉昭佑　　核章：＿＿＿＿＿＿＿＿
+      </div>
+      <div class="print-legal">${LEGAL_FOOTER}</div>
+    </div>
+  `;
+  triggerPrint(html);
+}
+
+// ===== 個人詳細報告 PDF =====
+function exportPersonPdf(idx){
+  const p = people[idx];
+  const r = calcOne(p);
+  if(r.error) return;
+
+  const cur = parseCode(p.code);
+  const curSalary = cur ? getSalary(cur.rank, cur.level) : undefined;
+
+  if(r.noMonthData){
+    const html = `
+      <div class="print-page">
+        <div class="print-title">同仁考核明細報告</div>
+        <div class="print-sub">台灣房屋捷運樂善直營店｜製表日期：${todayStr()}</div>
+        <div class="print-section">
+          <div class="print-row"><span class="lbl">姓名</span><span>${escapeHtml(p.name)}</span></div>
+          <div class="print-row"><span class="lbl">目前職等</span><span>${r.oldTitle}（${r.oldCode}）</span></div>
+          <div class="print-row"><span class="lbl">目前本薪</span><span>${curSalary!==undefined?curSalary.toLocaleString()+'元':'—'}</span></div>
+          <div class="print-row"><span class="lbl">累計警告／欠等／欠級</span><span>${p.cumWarnings} / ${p.rankDeficit} / ${p.levelDeficit}</span></div>
+        </div>
+        <div class="print-section">本月尚未輸入業績資料，無法產出本月計算明細。</div>
+        <div class="print-legal">${LEGAL_FOOTER}</div>
+      </div>
+    `;
+    triggerPrint(html);
+    return;
+  }
+
+  const newSalary = getSalary(r.finalRank, r.finalLevel);
+  const oldParsed = parseCode(r.oldCode);
+
+  const html = `
+    <div class="print-page">
+      <div class="print-title">同仁考核明細報告</div>
+      <div class="print-sub">台灣房屋捷運樂善直營店｜製表日期：${todayStr()}　考核月份業績：${r.revenue} 萬元</div>
+
+      <div class="print-section">
+        <h3>基本資料</h3>
+        <div class="print-row"><span class="lbl">姓名</span><span>${escapeHtml(p.name)}</span></div>
+        <div class="print-row"><span class="lbl">目前職等</span><span>${r.oldTitle}（${r.oldCode}）</span></div>
+        <div class="print-row"><span class="lbl">目前本薪</span><span>${curSalary!==undefined?curSalary.toLocaleString()+'元':'—'}</span></div>
+        <div class="print-row"><span class="lbl">累計警告（結算前）</span><span>${p.cumWarnings}</span></div>
+        <div class="print-row"><span class="lbl">累計欠等／欠級（結算前）</span><span>${p.rankDeficit} / ${p.levelDeficit}</span></div>
+      </div>
+
+      <div class="print-section">
+        <h3>① 業績面（升等／升級判定）</h3>
+        <div class="print-row"><span class="lbl">本月業績收款</span><span>${r.revenue} 萬元</span></div>
+        <div class="print-row"><span class="lbl">判定結果</span><span>${r.perf.changed ? `升至 ${TITLES[r.perf.newRank]}${formatCode(r.perf.newRank,r.perf.newLevel)}` : '未達升級門檻，維持原職等'}</span></div>
+        <div class="print-row"><span class="lbl">計算依據</span><span>${r.perf.note}</span></div>
+      </div>
+
+      <div class="print-section">
+        <h3>② 進案面（警告判定）</h3>
+        <div class="print-row"><span class="lbl">本月進案目標</span><span>專任委託 ${r.listing.target.ex} 件＋一般委託 ${r.listing.target.ge} 件</span></div>
+        <div class="print-row"><span class="lbl">缺額</span><span>專任缺 ${r.listing.exShort} 件、一般缺 ${r.listing.geShort} 件</span></div>
+        <div class="print-row"><span class="lbl">本月新增警告</span><span>+${r.listing.newWarnings}（專任每缺1件記2支，一般每缺1件記1支）</span></div>
+        <div class="print-row"><span class="lbl">累計警告（含本月）</span><span>${r.warn.totalWarnings}</span></div>
+        <div class="print-row"><span class="lbl">換算申誡</span><span>${r.warn.reprimands} 支（每3支警告=1支申誡，餘 ${r.warn.reprimandsLeftover} 支未滿3支警告部分已併入下方剩餘警告）</span></div>
+        <div class="print-row"><span class="lbl">本月降等</span><span>${r.warn.rankDemotions} 等（每3支申誡＝降1等）${r.warn.deficit>0?`，其中 ${r.warn.deficit} 等已觸底記為欠等`:''}</span></div>
+      </div>
+
+      <div class="print-section">
+        <h3>③ 責任額面（降級判定）</h3>
+        <div class="print-row"><span class="lbl">責任額標準</span><span>1 萬元／月（固定，不分職等）</span></div>
+        <div class="print-row"><span class="lbl">本月業績</span><span>${r.revenue} 萬元</span></div>
+        <div class="print-row"><span class="lbl">判定結果</span><span>${r.resp.triggered ? `業績未達責任額，直接降1級${r.resp.deficit>0?`（已觸底，欠級 ${r.resp.deficit}）`:''}` : '已達責任額，正常'}</span></div>
+      </div>
+
+      ${r.conflict ? `<div class="print-section" style="color:#a02020;font-weight:700;">注意：本月業績面達升等條件，但進案／責任額面同時產生降等效果，方向相反。已依「業績→進案警告→責任額」順序疊加計算，請主管確認最終結果是否符合公司意圖。</div>` : ''}
+
+      <div class="print-final">
+        下月建議職等：${r.finalTitle}（${r.finalCode}）　｜　下月本薪：${newSalary!==undefined?newSalary.toLocaleString()+'元':'—'}<br>
+        結算後累計警告：${r.leftoverWarnings}　累計欠等：${r.finalRankDeficit}　累計欠級：${r.finalLevelDeficit}
+      </div>
+
+      <div class="print-footer-sign">
+        本人已知悉以上考核內容　　同仁簽章：＿＿＿＿＿＿＿＿　　主管核章：＿＿＿＿＿＿＿＿
+      </div>
+      <div class="print-legal">${LEGAL_FOOTER}</div>
+    </div>
+  `;
+  triggerPrint(html);
+}
+
+// ===== 備份：匯出 JSON =====
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportJsonBackup(){
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    people: people,
+    historyLog: historyLog,
+  };
+  const filename = `職等計算工具_備份_${new Date().toISOString().slice(0,10)}.json`;
+  downloadFile(filename, JSON.stringify(payload, null, 2), 'application/json');
+  const status = document.getElementById('backupStatus');
+  if(status) status.textContent = '已下載備份檔：' + filename;
+}
+
+function importJsonBackup(file){
+  const status = document.getElementById('backupStatus');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.people || !Array.isArray(data.people)){
+        throw new Error('檔案格式不正確，找不到同仁名單資料');
+      }
+      people = data.people;
+      historyLog = Array.isArray(data.historyLog) ? data.historyLog : [];
+      render();
+      await save();
+      await saveHistory();
+      if(status) status.textContent = `匯入成功（${data.exportedAt ? '備份時間 '+new Date(data.exportedAt).toLocaleString('zh-TW') : ''}），已覆蓋目前資料`;
+    }catch(err){
+      if(status) status.textContent = '匯入失敗：' + err.message;
+    }
+  };
+  reader.onerror = () => { if(status) status.textContent = '讀取檔案失敗'; };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ===== 歷史異動紀錄：下載 CSV（可直接用 Excel 開啟） =====
+function exportHistoryCsv(){
+  const status = document.getElementById('backupStatus');
+  if(historyLog.length === 0){
+    if(status) status.textContent = '目前還沒有任何「套用本月並結算」的歷史紀錄';
+    return;
+  }
+  const headers = ['結算日期','姓名','原職等代碼','原職稱','新職等代碼','新職稱','原本薪','新本薪','本月業績(萬)',
+    '業績是否升等升級','業績判定依據','專任進案缺額','一般進案缺額','本月新增警告','累計警告(含本月)',
+    '本月降等數','是否觸發責任額降級','結算後累計欠等','結算後累計欠級','結算後剩餘警告'];
+  const rows = historyLog.map(h => [
+    h.date, h.name, h.oldCode, h.oldTitle, h.newCode, h.newTitle, h.oldSalary, h.newSalary, h.revenue,
+    h.perfChanged, h.perfNote, h.listingShortEx, h.listingShortGe, h.newWarnings, h.totalWarnings,
+    h.rankDemotions, h.respTriggered, h.finalRankDeficit, h.finalLevelDeficit, h.leftoverWarnings
+  ]);
+  // CSV欄位內若含逗號或換行需用雙引號包住，並把內部雙引號轉義
+  function csvCell(v){
+    const s = String(v ?? '');
+    if(s.includes(',') || s.includes('"') || s.includes('\n')){
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+  const csvLines = [headers.map(csvCell).join(','), ...rows.map(r => r.map(csvCell).join(','))];
+  // 加上 BOM 避免Excel開啟中文亂碼
+  const csvContent = '\uFEFF' + csvLines.join('\r\n');
+  const filename = `職等異動歷史紀錄_${new Date().toISOString().slice(0,10)}.csv`;
+  downloadFile(filename, csvContent, 'text/csv;charset=utf-8');
+  if(status) status.textContent = '已下載歷史紀錄：' + filename;
+}
+
+document.getElementById('exportJsonBtn').addEventListener('click', exportJsonBackup);
+document.getElementById('importJsonBtn').addEventListener('click', () => {
+  document.getElementById('importJsonFile').click();
+});
+document.getElementById('importJsonFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) importJsonBackup(file);
+  e.target.value = ''; // 允許重複選同一個檔案再次觸發change
+});
+document.getElementById('exportHistoryBtn').addEventListener('click', exportHistoryCsv);
+
+Promise.all([load(), loadHistory()]).then(render);
+</script>
+
+</body>
+</html>

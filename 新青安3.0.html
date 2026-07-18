@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新青安3.0 房貸專案 | 台灣房屋 捷運樂善直營店</title>
+<style>
+  :root{
+    --ink:#1c1f22;
+    --paper:#f7f5f1;
+    --panel:#ffffff;
+    --line:#e2ddd3;
+    --accent:#8a3b2b;
+    --accent-soft:#fbeae5;
+    --good:#2f6b4f;
+    --good-soft:#eaf3ee;
+    --muted:#6b6357;
+    --warn:#a8631f;
+    --warn-soft:#fbf0e1;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px;}
+  header.page{
+    border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:24px;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  }
+  header.page h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:.02em;}
+  header.page .sub{color:var(--muted);font-size:.85rem;}
+  header.page .tag{
+    font-size:.72rem;color:var(--accent);border:1px solid var(--accent);
+    padding:3px 10px;border-radius:999px;white-space:nowrap;font-weight:600;
+  }
+  section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px;}
+  section > h2{
+    font-size:.95rem;margin:0 0 16px;color:var(--accent);font-weight:700;
+    display:flex;align-items:center;gap:8px;
+  }
+  section > h2 .num{
+    font-size:.7rem;background:var(--accent);color:#fff;width:20px;height:20px;
+    border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .lead{font-size:.9rem;color:var(--ink);margin:0 0 6px;}
+  .lead + .lead{margin-top:10px;}
+  .note-box{
+    background:var(--warn-soft);border:1px solid #ecd8b4;border-radius:8px;
+    padding:10px 14px;font-size:.8rem;color:var(--warn);margin-top:10px;
+  }
+  .note-box.info{background:var(--accent-soft);border-color:#eccfc4;color:var(--accent);}
+  .note-box.good{background:var(--good-soft);border-color:#c9e2d3;color:var(--good);}
+
+  table.cmp{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px;}
+  table.cmp th{background:var(--accent);color:#fff;font-weight:700;padding:8px 10px;text-align:left;}
+  table.cmp td{padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.cmp tr:nth-child(even) td{background:#faf8f5;}
+  table.cmp td.k{color:var(--muted);font-weight:600;width:26%;}
+  table.cmp th.hl,table.cmp td.hl{background:var(--accent-soft) !important;}
+
+  ul.rule-list{margin:6px 0 0;padding-left:20px;font-size:.85rem;}
+  ul.rule-list li{margin-bottom:6px;}
+  ul.rule-list b{color:var(--accent);}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .grid.g2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:700px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:480px){ .grid{grid-template-columns:1fr;} }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:.8rem;color:var(--muted);font-weight:600;}
+  input[type="number"],select{
+    border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-size:.95rem;
+    background:#fff;color:var(--ink);font-family:inherit;width:100%;
+  }
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  input[type="number"]{font-variant-numeric:tabular-nums;}
+
+  .result-band{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    background:linear-gradient(90deg,var(--accent),#b25a44);color:#fff;
+    border-radius:8px;padding:14px 20px;margin-top:14px;
+  }
+  .result-band .lab{font-size:.85rem;}
+  .result-band .lab small{display:block;font-size:.7rem;opacity:.85;font-weight:400;}
+  .result-band .num{font-size:1.3rem;font-weight:900;font-variant-numeric:tabular-nums;}
+
+  table.sched{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:12px;}
+  table.sched th{background:#efe6dc;color:var(--accent);font-weight:700;padding:6px 8px;text-align:right;}
+  table.sched th:first-child{text-align:left;}
+  table.sched td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;}
+  table.sched td:first-child{text-align:left;color:var(--muted);}
+
+  footer.note{font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:8px;border-top:1px solid var(--line);padding-top:10px;}
+  .src{font-size:.68rem;color:#a39a8c;margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div>
+      <h1>新青安 3.0 房貸專案</h1>
+      <div class="sub">台灣房屋 捷運樂善直營店．資料彙整參考</div>
+    </div>
+    <div class="tag">2026/08/01 上路</div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span>方案沿革</h2>
+    <p class="lead">青年安心成家購屋貸款已推行三個世代，現行「新青安（2.0）」將於 <b>2026年7月31日</b> 屆期，最遲撥款至 2026年10月31日；行政院已核定接續的 <b>青安3.0</b>，預計 <b>2026年8月1日</b> 上路，實施至 <b>2029年7月31日</b>。</p>
+    <table class="cmp">
+      <thead><tr><th>方案</th><th>期間</th><th>額度上限</th><th>年限／寬限期</th><th>利率（補貼後）</th></tr></thead>
+      <tbody>
+        <tr><td class="k">青安 1.0</td><td>2010/12 ～ 2023/07</td><td>800萬</td><td>30年／3年</td><td>—</td></tr>
+        <tr><td class="k">新青安 2.0</td><td>2023/08 ～ 2026/07</td><td>1,000萬</td><td>40年／5年</td><td>最低約 1.775%</td></tr>
+        <tr class="hl"><td class="k">青安 3.0</td><td>2026/08 ～ 2029/07</td><td>1,000～1,500萬</td><td>40年／5年</td><td>最低 1.775%（逐年遞增）</td></tr>
+      </tbody>
+    </table>
+    <div class="note-box">青安3.0 目前為近期行政院會通過之規劃內容，實際申請細節仍以財政部與承貸銀行正式公告為準；本頁資訊僅供參考，請於送件前向承辦銀行確認最新條件。</div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>申請資格三大限制</h2>
+    <ul class="rule-list">
+      <li><b>基本資格：</b>年滿18歲，且本人、配偶及未成年子女名下均無自有住宅（俗稱「首購」），一生限貸一次。</li>
+      <li><b>年齡與「80條款」：</b>申貸時須未滿50歲；且「申貸年齡＋貸款年限」須小於80。例如45歲最長只能申請34年（45+34=79）。</li>
+      <li><b>房屋總價上限：</b>台北市 3,500萬元；新北市、新竹縣市 2,500萬元；其餘縣市 2,000萬元。超過上限者不適用本專案。</li>
+      <li><b>年所得排富：</b>借款人「本人」（非家戶）前一年度綜合所得總額不得超過 200萬元。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>貸款額度與年限</h2>
+    <table class="cmp">
+      <thead><tr><th>身分類別</th><th>最高貸款額度</th><th>備註</th></tr></thead>
+      <tbody>
+        <tr><td class="k">一般首購族</td><td>1,000萬元</td><td>維持與2.0相同上限</td></tr>
+        <tr><td class="k">新婚家庭</td><td>1,200萬元</td><td>結婚2年內</td></tr>
+        <tr><td class="k">育兒家庭</td><td>1,500萬元</td><td>育有未成年子女</td></tr>
+      </tbody>
+    </table>
+    <p class="lead" style="margin-top:10px;">最高貸款成數維持 8成；貸款年限最長 40年；寬限期最長 5年（寬限期內僅繳息，本金於期滿後開始攤還）。超過額度上限之部分，需另搭配銀行一般房貸利率計算。</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span>利率與補貼退場機制</h2>
+    <p class="lead">青安3.0 全面採「一段式機動利率」，前3年享滿額補貼（銀行減收半碼＋政府住宅基金補貼1.5碼，合計2碼），最低利率約 <b>1.775%</b>。自撥貸滿3年之次日起，補貼採「每年減少半碼（約0.125%）」方式逐年遞減，直至第7年起補貼完全歸零、回復未補貼之基準利率（約 2.275%）。</p>
+    <div class="note-box info">此退場機制「回溯適用」所有既有青安戶：不論是青安1.0或2.0的舊貸戶，只要撥貸已滿3年，同樣自2026年8月1日起開始逐年減少補貼。</div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span>月付金試算（估算工具）</h2>
+    <div class="grid">
+      <div class="field"><label>貸款金額（元）</label><input type="number" id="loanAmt" value="8000000" step="100000"></div>
+      <div class="field"><label>貸款年限（年，不含寬限期，最長40）</label><input type="number" id="loanYears" value="40" step="1" min="1" max="40"></div>
+      <div class="field"><label>寬限期（年，最長5）</label><input type="number" id="graceYears" value="5" step="1" min="0" max="5"></div>
+    </div>
+    <div id="scheduleOut"></div>
+    <div class="note-box">試算採「一段式機動利率」逐年遞增估算（前3年1.775%，第4~6年每年+0.125碼，第7年起回復基準利率2.275%），僅供概念參考，實際核貸利率、成數與月付金以承貸銀行公告及對保文件為準。</div>
+  </section>
+
+  <footer class="note">
+    資料彙整日期：2026年7月18日。青安3.0尚未經財政部逐項正式公告細節，實際條件請以官方公告及承貸之8大公股銀行（臺灣銀行、土地銀行、第一銀行、華南銀行、彰化銀行、兆豐銀行、臺灣中小企業銀行、合作金庫）最終審核結果為準。<br>
+    台灣房屋 捷運樂善直營店　劉昭佑　經紀人 康博超　桃市經字第001240號
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const nt = x => Math.round(x).toLocaleString('en-US');
+
+  // 各年利率估算：前3年1.775%，第4~6年每年+0.125%，第7年起封頂於2.275%
+  function rateForYear(y){
+    if(y <= 3) return 1.775;
+    if(y >= 7) return 2.275;
+    return Math.min(2.275, 1.775 + (y-3)*0.125);
+  }
+
+  function monthlyPI(principal, annualRatePct, months){
+    const r = annualRatePct/100/12;
+    if(r === 0) return principal/months;
+    return principal * r * Math.pow(1+r, months) / (Math.pow(1+r, months) - 1);
+  }
+
+  function render(){
+    const loan = parseFloat($('loanAmt').value) || 0;
+    const years = Math.min(40, Math.max(1, parseFloat($('loanYears').value) || 40));
+    const grace = Math.min(5, Math.max(0, parseFloat($('graceYears').value) || 0));
+    const amortMonths = (years - grace) * 12;
+
+    let rows = '';
+    for(let y=1; y<=Math.min(years,10); y++){
+      const rate = rateForYear(y);
+      let payment;
+      if(y <= grace){
+        payment = loan * rate/100/12; // 寬限期：只繳息
+      } else {
+        payment = monthlyPI(loan, rate, amortMonths);
+      }
+      rows += `<tr><td>第${y}年</td><td>${rate.toFixed(3)}%</td><td>${nt(payment)}</td></tr>`;
+    }
+
+    $('scheduleOut').innerHTML = `
+      <div class="result-band">
+        <div class="lab">寬限期內每月付息（第1年，利率1.775%）<small>僅繳利息，本金未攤還</small></div>
+        <div class="num">NT$ ${nt(grace>0 ? loan*1.775/100/12 : monthlyPI(loan,1.775,amortMonths))}</div>
+      </div>
+      <table class="sched">
+        <thead><tr><th>期間</th><th>估算利率</th><th>估算月付金 (NT$)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  document.querySelectorAll('input').forEach(el=> el.addEventListener('input', render));
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>買方應付價金試算 | 台灣房屋 捷運樂善直營店</title>
+<style>
+  :root{
+    --ink:#1c1f22;
+    --paper:#f7f5f1;
+    --panel:#ffffff;
+    --line:#e2ddd3;
+    --accent:#8a3b2b;
+    --accent-soft:#fbeae5;
+    --good:#2f6b4f;
+    --good-soft:#eaf3ee;
+    --muted:#6b6357;
+    --warn:#a8631f;
+    --warn-soft:#fbf0e1;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px;}
+  header.page{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header.page h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:.02em;}
+  header.page .sub{color:var(--muted);font-size:.85rem;}
+  header.page .tag{
+    font-size:.72rem;color:var(--accent);border:1px solid var(--accent);
+    padding:3px 10px;border-radius:999px;white-space:nowrap;font-weight:600;
+  }
+  section{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:20px;margin-bottom:18px;
+  }
+  section > h2{
+    font-size:.95rem;margin:0 0 16px;color:var(--accent);font-weight:700;
+    display:flex;align-items:center;gap:8px;
+  }
+  section > h2 .num{
+    font-size:.7rem;background:var(--accent);color:#fff;width:20px;height:20px;
+    border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .grid.g2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:700px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:480px){ .grid{grid-template-columns:1fr;} }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:.8rem;color:var(--muted);font-weight:600;}
+  .field .hint{font-size:.72rem;color:var(--muted);margin-top:-2px;}
+  input[type="text"],input[type="number"],input[type="date"]{
+    border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-size:.95rem;
+    background:#fff;color:var(--ink);font-family:inherit;width:100%;
+  }
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  input[type="number"]{font-variant-numeric:tabular-nums;}
+
+  table.fees{width:100%;border-collapse:collapse;margin-top:4px;font-size:.88rem;}
+  table.fees thead th{
+    background:var(--accent);color:#fff;font-size:.78rem;font-weight:700;
+    padding:8px 10px;text-align:left;
+  }
+  table.fees thead th.amt{text-align:right;}
+  table.fees td{padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.fees tr:nth-child(even) td{background:#faf8f5;}
+  table.fees td.code{width:26px;color:var(--warn);font-weight:800;text-align:center;}
+  table.fees td.name{font-weight:700;width:130px;}
+  table.fees td.note{color:var(--muted);font-size:.78rem;}
+  table.fees td.amt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;width:110px;}
+  table.fees tr.row-deal td{background:var(--accent-soft) !important;}
+  table.fees tr.row-deal .name,table.fees tr.row-deal .amt{color:var(--accent);}
+  table.fees tr.subtotal td{background:#f1e8de !important;border-top:2px solid var(--accent);font-weight:800;}
+  table.fees tr.subtotal .amt{color:var(--accent);font-size:1rem;}
+
+  .total-band{
+    display:flex;justify-content:space-between;align-items:center;
+    background:linear-gradient(90deg,var(--accent),#b25a44);color:#fff;
+    border-radius:8px;padding:16px 22px;margin-top:16px;
+  }
+  .total-band .lab{font-size:1rem;font-weight:700;}
+  .total-band .lab small{display:block;font-size:.72rem;opacity:.85;font-weight:400;}
+  .total-band .num{font-size:1.7rem;font-weight:900;font-variant-numeric:tabular-nums;}
+  .total-band .num small{font-size:.9rem;font-weight:700;}
+
+  .funds{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;}
+  .funds .card{
+    flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:8px;padding:12px 16px;
+  }
+  .funds .card .k{font-size:.78rem;color:var(--muted);}
+  .funds .card .v{font-size:1.2rem;font-weight:900;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums;}
+  .funds .card.hl{background:var(--accent-soft);border-color:var(--accent);}
+  .funds .card.hl .v{color:var(--accent);}
+
+  .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  button.primary{
+    background:var(--accent);color:#fff;border:none;border-radius:8px;
+    padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  button.primary:hover{opacity:.92;}
+
+  footer.note{
+    font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:8px;
+    border-top:1px solid var(--line);padding-top:10px;
+  }
+
+  /* ===== 列印用摘要（畫面隱藏，列印時顯示） ===== */
+  #printSummary{display:none;}
+  @media print{
+    body{background:#fff;}
+    .wrap{max-width:100%;padding:0;}
+    header.page, section:not(#printSection), .btnbar{display:none !important;}
+    #printSummary{display:block;}
+    #printSection{border:none;padding:0;margin:0;}
+  }
+  .p-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--accent);padding-bottom:10px;margin-bottom:10px;}
+  .p-head .store{font-size:1.05rem;font-weight:900;color:var(--accent);}
+  .p-head .sub{font-size:.75rem;color:#888;margin-top:2px;}
+  .p-head .title{font-size:1.4rem;font-weight:900;text-align:right;}
+  .p-head .date{font-size:.75rem;color:#999;text-align:right;margin-top:2px;}
+  .p-meta{display:flex;gap:10px;margin:12px 0 16px;}
+  .p-meta .box{flex:1;background:var(--accent-soft);border-left:4px solid var(--accent);padding:7px 11px;border-radius:3px;}
+  .p-meta .box .k{font-size:.7rem;color:var(--accent);font-weight:700;}
+  .p-meta .box .v{font-size:.95rem;color:var(--ink);font-weight:700;margin-top:1px;}
+  .p-sec-title{font-size:.9rem;font-weight:900;color:#444;margin:16px 0 7px;padding-left:9px;border-left:4px solid var(--accent);}
+  table.assume{width:100%;border-collapse:collapse;font-size:.8rem;}
+  table.assume td{padding:5px 9px;border:1px solid #eee;}
+  table.assume td.k{background:#faf7f3;color:#7a7a7a;font-weight:600;}
+  table.assume td.v{text-align:right;font-weight:700;color:#333;}
+  .p-foot{margin-top:20px;padding-top:9px;border-top:1px solid #eee;font-size:.72rem;color:#9a9a9a;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div>
+      <h1>買方應付價金試算</h1>
+      <div class="sub">台灣房屋 捷運樂善直營店．承辦經紀人員：劉昭佑</div>
+    </div>
+    <div class="tag">買方成本試算</div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span>物件與買方資訊</h2>
+    <div class="grid g2">
+      <div class="field"><label>物件／案名</label><input type="text" id="caseName" placeholder="例：文化路電梯三房"></div>
+      <div class="field"><label>買方</label><input type="text" id="buyerName" placeholder="例：王先生"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>成交與試算基礎</h2>
+    <div class="grid">
+      <div class="field"><label>成交金額（元）</label><input type="number" id="dealPrice" value="15250000" step="10000"></div>
+      <div class="field"><label>房屋評定現值（元）</label><input type="number" id="houseValue" value="320000" step="1000"></div>
+      <div class="field"><label>貸款成數（%）</label><input type="number" id="loanRatio" value="80" step="5" min="0" max="100"></div>
+      <div class="field"><label>土地公告現值（單價，元/㎡）</label><input type="number" id="landUnit" value="94859" step="100"></div>
+      <div class="field"><label>土地面積（㎡）</label><input type="number" id="landArea" value="1011" step="1"></div>
+      <div class="field"><label>所有權人持分</label><input type="number" id="share" value="0.0041" step="0.0001"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>可調整費用</h2>
+    <div class="grid">
+      <div class="field"><label>服務費率（%）</label><input type="number" id="serviceRate" value="2" step="0.1"></div>
+      <div class="field"><label>代書費（元）</label><input type="number" id="scrivenerFee" value="20000" step="1000"></div>
+      <div class="field"><label>代書潤筆費（元）</label><input type="number" id="scrivenerBonus" value="2000" step="500"></div>
+      <div class="field"><label>銀行手續費（元）</label><input type="number" id="bankFee" value="5000" step="500"></div>
+    </div>
+    <div class="grid g2" style="margin-top:14px;">
+      <div class="field"><label>製表日期</label><input type="date" id="reportDate"></div>
+    </div>
+  </section>
+
+  <section id="printSection">
+    <h2><span class="num">4</span>試算結果</h2>
+    <table class="fees">
+      <thead><tr><th class="code">項</th><th>項目</th><th>計算說明</th><th class="amt">金額 (NT$)</th></tr></thead>
+      <tbody id="feeRows"></tbody>
+    </table>
+    <div class="total-band">
+      <div class="lab">應付總額<small>成交金額 ＋ 應付雜項規費</small></div>
+      <div class="num"><small>NT$ </small><span id="totalOut">0</span></div>
+    </div>
+    <div class="funds">
+      <div class="card"><div class="k" id="loanLabel">銀行貸款金額</div><div class="v" id="loanOut">NT$ 0</div></div>
+      <div class="card hl"><div class="k">預估應備自備款　＝　應付總額 － 銀行貸款</div><div class="v" id="ownFundsOut">NT$ 0</div></div>
+    </div>
+    <footer class="note">
+      付款流程提醒：① 簽約／頭款＋仲介費　② 用印　③ 完稅款＋代書費（稅金）　④ 交屋（撥貸款金額）<br>
+      經紀業：康博超　桃市經字第001240號　│　經紀人員：劉昭佑　(101)登字第209224號<br>
+      本表各項規費（契稅、印花稅、地政規費、代書費等）依物件條件而異，實際金額以地政事務所、稅捐稽徵處、承貸銀行及地政士核算為準，僅供買方預估參考。
+    </footer>
+  </section>
+
+  <div class="btnbar">
+    <button class="primary" id="printBtn">🖨️ 列印／輸出 PDF</button>
+  </div>
+
+  <!-- ===== 列印專用版面（畫面隱藏，列印時才顯示，格式較完整） ===== -->
+  <div id="printSummary"></div>
+
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const nt = x => Math.round(x).toLocaleString('en-US');
+
+  const ROWS = [
+    ['A','成交金額','斡旋／成交價','A_deal'],
+    ['B','服務費','成交金額 × 服務費率','B_service'],
+    ['C','契稅','房屋評定現值 × 6%','C_contract'],
+    ['D','印花稅','(房屋評定現值＋土地公告價值) ÷ 1000','D_stamp'],
+    ['E','代書費','建物+土地+設定+實價登錄','E_scrivener'],
+    ['F','代書潤筆費','—','F_bonus'],
+    ['G','履約保證帳戶費','成交金額 × 3/10000','G_escrow'],
+    ['H','地政規費','每貸款 100 萬收 1,000 元','H_registry'],
+    ['I','銀行手續費','依各銀行收取狀況','I_bankfee'],
+  ];
+
+  function num(id){ const v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+
+  function compute(){
+    const deal = num('dealPrice');
+    const house = num('houseValue');
+    const landValue = num('landUnit') * num('landArea') * num('share');
+    const loanRatio = num('loanRatio') / 100;
+    const loan = deal * loanRatio;
+
+    const items = {
+      A_deal: deal,
+      B_service: deal * (num('serviceRate')/100),
+      C_contract: house * 0.06,
+      D_stamp: (house + landValue) / 1000,
+      E_scrivener: num('scrivenerFee'),
+      F_bonus: num('scrivenerBonus'),
+      G_escrow: deal * 3 / 10000,
+      H_registry: (loan / 1000000) * 1000,
+      I_bankfee: num('bankFee'),
+    };
+    let misc = 0;
+    Object.keys(items).forEach(k=>{ if(k !== 'A_deal') misc += items[k]; });
+    const total = deal + misc;
+    return {items, landValue, loan, loanRatio, misc, total, ownFunds: total - loan};
+  }
+
+  function render(){
+    const r = compute();
+    let rowsHtml = '';
+    ROWS.forEach(([code, name, note, key])=>{
+      const cls = code === 'A' ? ' class="row-deal"' : '';
+      rowsHtml += `<tr${cls}><td class="code">${code}</td><td class="name">${name}</td><td class="note">${note}</td><td class="amt">${nt(r.items[key])}</td></tr>`;
+    });
+    rowsHtml += `<tr class="subtotal"><td class="code">J</td><td class="name">應付雜項規費</td><td class="note">B＋C＋D＋E＋F＋G＋H＋I（不含成交金額）</td><td class="amt">${nt(r.misc)}</td></tr>`;
+    $('feeRows').innerHTML = rowsHtml;
+
+    $('totalOut').textContent = nt(r.total);
+    $('loanLabel').textContent = `銀行貸款金額（${Math.round(r.loanRatio*100)}成）`;
+    $('loanOut').textContent = 'NT$ ' + nt(r.loan);
+    $('ownFundsOut').textContent = 'NT$ ' + nt(r.ownFunds);
+
+    buildPrintSummary(r);
+  }
+
+  function buildPrintSummary(r){
+    const caseName = $('caseName').value.trim() || '—';
+    const buyerName = $('buyerName').value.trim() || '—';
+    const reportDate = $('reportDate').value ? new Date($('reportDate').value).toLocaleDateString('zh-TW') : new Date().toLocaleDateString('zh-TW');
+
+    let feeRowsHtml = '';
+    ROWS.forEach(([code, name, note, key])=>{
+      const cls = code === 'A' ? ' class="row-deal"' : '';
+      feeRowsHtml += `<tr${cls}><td class="code">${code}</td><td class="name">${name}</td><td class="note">${note}</td><td class="amt">${nt(r.items[key])}</td></tr>`;
+    });
+    feeRowsHtml += `<tr class="subtotal"><td class="code">J</td><td class="name">應付雜項規費</td><td class="note">B＋C＋D＋E＋F＋G＋H＋I（不含成交金額）</td><td class="amt">${nt(r.misc)}</td></tr>`;
+
+    $('printSummary').innerHTML = `
+      <div class="p-head">
+        <div><div class="store">台灣房屋 捷運樂善直營店</div><div class="sub">承辦經紀人員：劉昭佑　│　專營 林口・龜山・A7重劃區</div></div>
+        <div><div class="title">買方應付價金試算</div><div class="date">製表日期 ${reportDate}</div></div>
+      </div>
+      <div class="p-meta">
+        <div class="box"><div class="k">物件／案名</div><div class="v">${caseName}</div></div>
+        <div class="box"><div class="k">買　　方</div><div class="v">${buyerName}</div></div>
+        <div class="box"><div class="k">成交金額</div><div class="v">NT$ ${nt(r.items.A_deal)}</div></div>
+      </div>
+      <div class="p-sec-title">試算基礎</div>
+      <table class="assume">
+        <tr><td class="k">房屋評定現值</td><td class="v">${nt(num('houseValue'))}</td>
+          <td class="k">土地公告現值(單價)</td><td class="v">${nt(num('landUnit'))}</td>
+          <td class="k">土地面積(㎡)</td><td class="v">${nt(num('landArea'))}</td></tr>
+        <tr><td class="k">所有權人持分</td><td class="v">${num('share')}</td>
+          <td class="k">土地公告價值</td><td class="v">${nt(r.landValue)}</td>
+          <td class="k">貸款成數</td><td class="v">${Math.round(r.loanRatio*100)}%</td></tr>
+      </table>
+      <div class="p-sec-title">應付規費明細</div>
+      <table class="fees">
+        <thead><tr><th class="code">項</th><th>項目</th><th>計算說明</th><th class="amt">金額 (NT$)</th></tr></thead>
+        <tbody>${feeRowsHtml}</tbody>
+      </table>
+      <div class="total-band"><div class="lab">應付總額<small>成交金額 ＋ 應付雜項規費</small></div>
+        <div class="num"><small>NT$ </small>${nt(r.total)}</div></div>
+      <div class="funds">
+        <div class="card"><div class="k">銀行貸款金額（${Math.round(r.loanRatio*100)}成）</div><div class="v">NT$ ${nt(r.loan)}</div></div>
+        <div class="card hl"><div class="k">預估應備自備款　＝　應付總額 － 銀行貸款</div><div class="v">NT$ ${nt(r.ownFunds)}</div></div>
+      </div>
+      <div class="p-foot">
+        付款流程提醒：① 簽約／頭款＋仲介費　② 用印　③ 完稅款＋代書費（稅金）　④ 交屋（撥貸款金額）<br>
+        經紀業：康博超　桃市經字第001240號　│　經紀人員：劉昭佑　(101)登字第209224號<br>
+        本表各項規費依物件條件而異，實際金額以地政事務所、稅捐稽徵處、承貸銀行及地政士核算為準，僅供買方預估參考。
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('input').forEach(el=> el.addEventListener('input', render));
+  $('printBtn').addEventListener('click', ()=>{ render(); window.print(); });
+
+  $('reportDate').value = new Date().toISOString().slice(0,10);
+  render();
+})();
+</script>
+</body>
+</html>
