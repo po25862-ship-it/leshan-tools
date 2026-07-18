@@ -25,8 +25,7 @@
 <body>
 <div id="root"></div>
 
-<script type="text/babel" data-presets="react">
-const { useState, useMemo } = React;
+<script type="text/plain" id="app-jsx-source">const { useState, useMemo } = React;
 
 // ---------- 圖示替代元件（不依賴 lucide-react，改用內建 emoji／符號） ----------
 function IconBase({ children, size = 16, className = "" }) {
@@ -1135,6 +1134,26 @@ function App() {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
+</script>
+
+<script>
+(function(){
+  try{
+    var source = document.getElementById('app-jsx-source').textContent;
+    var compiled = Babel.transform(source, {
+      presets: [['react', { runtime: 'classic' }]]
+    }).code;
+    var script = document.createElement('script');
+    script.text = compiled;
+    document.body.appendChild(script);
+  }catch(err){
+    document.getElementById('root').innerHTML =
+      '<div style="padding:24px;font-family:sans-serif;color:#a02020;">頁面載入失敗：' +
+      (err && err.message ? err.message : err) +
+      '<br>請確認 vendor 資料夾內的檔案都有正確上傳，或重新整理頁面。</div>';
+    console.error(err);
+  }
+})();
 </script>
 </body>
 </html>
