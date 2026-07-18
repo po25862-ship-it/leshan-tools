@@ -3,223 +3,1134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>新青安3.0 房貸專案 | 台灣房屋 捷運樂善直營店</title>
+<title>新青安3.0 資格快速試算 | 台灣房屋 捷運樂善直營店</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root{
-    --ink:#1c1f22;
-    --paper:#f7f5f1;
-    --panel:#ffffff;
-    --line:#e2ddd3;
-    --accent:#8a3b2b;
-    --accent-soft:#fbeae5;
-    --good:#2f6b4f;
-    --good-soft:#eaf3ee;
-    --muted:#6b6357;
-    --warn:#a8631f;
-    --warn-soft:#fbf0e1;
-    font-size:16px;
+  body{ margin:0; }
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white !important; }
+    .print-card { break-inside: avoid; }
+    .print-header-block { display: block !important; }
   }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;background:var(--paper);color:var(--ink);
-    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,sans-serif;
-    line-height:1.55;-webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px;}
-  header.page{
-    border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:24px;
-    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
-  }
-  header.page h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:.02em;}
-  header.page .sub{color:var(--muted);font-size:.85rem;}
-  header.page .tag{
-    font-size:.72rem;color:var(--accent);border:1px solid var(--accent);
-    padding:3px 10px;border-radius:999px;white-space:nowrap;font-weight:600;
-  }
-  section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px;}
-  section > h2{
-    font-size:.95rem;margin:0 0 16px;color:var(--accent);font-weight:700;
-    display:flex;align-items:center;gap:8px;
-  }
-  section > h2 .num{
-    font-size:.7rem;background:var(--accent);color:#fff;width:20px;height:20px;
-    border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;
-  }
-  .lead{font-size:.9rem;color:var(--ink);margin:0 0 6px;}
-  .lead + .lead{margin-top:10px;}
-  .note-box{
-    background:var(--warn-soft);border:1px solid #ecd8b4;border-radius:8px;
-    padding:10px 14px;font-size:.8rem;color:var(--warn);margin-top:10px;
-  }
-  .note-box.info{background:var(--accent-soft);border-color:#eccfc4;color:var(--accent);}
-  .note-box.good{background:var(--good-soft);border-color:#c9e2d3;color:var(--good);}
-
-  table.cmp{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px;}
-  table.cmp th{background:var(--accent);color:#fff;font-weight:700;padding:8px 10px;text-align:left;}
-  table.cmp td{padding:8px 10px;border-bottom:1px solid var(--line);}
-  table.cmp tr:nth-child(even) td{background:#faf8f5;}
-  table.cmp td.k{color:var(--muted);font-weight:600;width:26%;}
-  table.cmp th.hl,table.cmp td.hl{background:var(--accent-soft) !important;}
-
-  ul.rule-list{margin:6px 0 0;padding-left:20px;font-size:.85rem;}
-  ul.rule-list li{margin-bottom:6px;}
-  ul.rule-list b{color:var(--accent);}
-
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .grid.g2{grid-template-columns:repeat(2,1fr);}
-  @media (max-width:700px){ .grid{grid-template-columns:1fr 1fr;} }
-  @media (max-width:480px){ .grid{grid-template-columns:1fr;} }
-  .field{display:flex;flex-direction:column;gap:6px;}
-  .field label{font-size:.8rem;color:var(--muted);font-weight:600;}
-  input[type="number"],select{
-    border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-size:.95rem;
-    background:#fff;color:var(--ink);font-family:inherit;width:100%;
-  }
-  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
-  input[type="number"]{font-variant-numeric:tabular-nums;}
-
-  .result-band{
-    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
-    background:linear-gradient(90deg,var(--accent),#b25a44);color:#fff;
-    border-radius:8px;padding:14px 20px;margin-top:14px;
-  }
-  .result-band .lab{font-size:.85rem;}
-  .result-band .lab small{display:block;font-size:.7rem;opacity:.85;font-weight:400;}
-  .result-band .num{font-size:1.3rem;font-weight:900;font-variant-numeric:tabular-nums;}
-
-  table.sched{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:12px;}
-  table.sched th{background:#efe6dc;color:var(--accent);font-weight:700;padding:6px 8px;text-align:right;}
-  table.sched th:first-child{text-align:left;}
-  table.sched td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;}
-  table.sched td:first-child{text-align:left;color:var(--muted);}
-
-  footer.note{font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:8px;border-top:1px solid var(--line);padding-top:10px;}
-  .src{font-size:.68rem;color:#a39a8c;margin-top:14px;}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div id="root"></div>
 
-  <header class="page">
-    <div>
-      <h1>新青安 3.0 房貸專案</h1>
-      <div class="sub">台灣房屋 捷運樂善直營店．資料彙整參考</div>
-    </div>
-    <div class="tag">2026/08/01 上路</div>
-  </header>
+<script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
 
-  <section>
-    <h2><span class="num">1</span>方案沿革</h2>
-    <p class="lead">青年安心成家購屋貸款已推行三個世代，現行「新青安（2.0）」將於 <b>2026年7月31日</b> 屆期，最遲撥款至 2026年10月31日；行政院已核定接續的 <b>青安3.0</b>，預計 <b>2026年8月1日</b> 上路，實施至 <b>2029年7月31日</b>。</p>
-    <table class="cmp">
-      <thead><tr><th>方案</th><th>期間</th><th>額度上限</th><th>年限／寬限期</th><th>利率（補貼後）</th></tr></thead>
-      <tbody>
-        <tr><td class="k">青安 1.0</td><td>2010/12 ～ 2023/07</td><td>800萬</td><td>30年／3年</td><td>—</td></tr>
-        <tr><td class="k">新青安 2.0</td><td>2023/08 ～ 2026/07</td><td>1,000萬</td><td>40年／5年</td><td>最低約 1.775%</td></tr>
-        <tr class="hl"><td class="k">青安 3.0</td><td>2026/08 ～ 2029/07</td><td>1,000～1,500萬</td><td>40年／5年</td><td>最低 1.775%（逐年遞增）</td></tr>
-      </tbody>
-    </table>
-    <div class="note-box">青安3.0 目前為近期行政院會通過之規劃內容，實際申請細節仍以財政部與承貸銀行正式公告為準；本頁資訊僅供參考，請於送件前向承辦銀行確認最新條件。</div>
-  </section>
+// ---------- 圖示替代元件（不依賴 lucide-react，改用內建 emoji／符號） ----------
+function IconBase({ children, size = 16, className = "" }) {
+  return (
+    <span
+      className={className}
+      style={{ fontSize: size, lineHeight: 1, display: "inline-flex", verticalAlign: "middle" }}
+    >
+      {children}
+    </span>
+  );
+}
+function CheckCircle2({ size, className }) { return <IconBase size={size} className={className}>✅</IconBase>; }
+function XCircle({ size, className }) { return <IconBase size={size} className={className}>❌</IconBase>; }
+function ChevronRight({ size, className }) { return <IconBase size={size} className={className}>›</IconBase>; }
+function RotateCcw({ size, className }) { return <IconBase size={size} className={className}>↺</IconBase>; }
+function Home({ size, className }) { return <IconBase size={size} className={className}>🏠</IconBase>; }
+function AlertTriangle({ size, className }) { return <IconBase size={size} className={className}>⚠️</IconBase>; }
+function Printer({ size, className }) { return <IconBase size={size} className={className}>🖨️</IconBase>; }
 
-  <section>
-    <h2><span class="num">2</span>申請資格三大限制</h2>
-    <ul class="rule-list">
-      <li><b>基本資格：</b>年滿18歲，且本人、配偶及未成年子女名下均無自有住宅（俗稱「首購」），一生限貸一次。</li>
-      <li><b>年齡與「80條款」：</b>申貸時須未滿50歲；且「申貸年齡＋貸款年限」須小於80。例如45歲最長只能申請34年（45+34=79）。</li>
-      <li><b>房屋總價上限：</b>台北市 3,500萬元；新北市、新竹縣市 2,500萬元；其餘縣市 2,000萬元。超過上限者不適用本專案。</li>
-      <li><b>年所得排富：</b>借款人「本人」（非家戶）前一年度綜合所得總額不得超過 200萬元。</li>
-    </ul>
-  </section>
 
-  <section>
-    <h2><span class="num">3</span>貸款額度與年限</h2>
-    <table class="cmp">
-      <thead><tr><th>身分類別</th><th>最高貸款額度</th><th>備註</th></tr></thead>
-      <tbody>
-        <tr><td class="k">一般首購族</td><td>1,000萬元</td><td>維持與2.0相同上限</td></tr>
-        <tr><td class="k">新婚家庭</td><td>1,200萬元</td><td>結婚2年內</td></tr>
-        <tr><td class="k">育兒家庭</td><td>1,500萬元</td><td>育有未成年子女</td></tr>
-      </tbody>
-    </table>
-    <p class="lead" style="margin-top:10px;">最高貸款成數維持 8成；貸款年限最長 40年；寬限期最長 5年（寬限期內僅繳息，本金於期滿後開始攤還）。超過額度上限之部分，需另搭配銀行一般房貸利率計算。</p>
-  </section>
+// ---------- 常數設定 ----------
+const CITY_CAP = {
+  "台北市": 3500,
+  "新北市": 2500,
+  "新竹縣": 2500,
+  "新竹市": 2500,
+  "桃園市（含林口龜山A7）": 2000,
+  "其他縣市": 2000,
+};
 
-  <section>
-    <h2><span class="num">4</span>利率與補貼退場機制</h2>
-    <p class="lead">青安3.0 全面採「一段式機動利率」，前3年享滿額補貼（銀行減收半碼＋政府住宅基金補貼1.5碼，合計2碼），最低利率約 <b>1.775%</b>。自撥貸滿3年之次日起，補貼採「每年減少半碼（約0.125%）」方式逐年遞減，直至第7年起補貼完全歸零、回復未補貼之基準利率（約 2.275%）。</p>
-    <div class="note-box info">此退場機制「回溯適用」所有既有青安戶：不論是青安1.0或2.0的舊貸戶，只要撥貸已滿3年，同樣自2026年8月1日起開始逐年減少補貼。</div>
-  </section>
+const FAMILY_TYPE = {
+  general: { label: "一般戶", cap: 1000 },
+  newlywed: { label: "新婚家庭（申請日前2年內結婚登記）", cap: 1200 },
+  children: { label: "育兒家庭（育有未成年子女）", cap: 1500 },
+};
 
-  <section>
-    <h2><span class="num">5</span>月付金試算（估算工具）</h2>
-    <div class="grid">
-      <div class="field"><label>貸款金額（元）</label><input type="number" id="loanAmt" value="8000000" step="100000"></div>
-      <div class="field"><label>貸款年限（年，不含寬限期，最長40）</label><input type="number" id="loanYears" value="40" step="1" min="1" max="40"></div>
-      <div class="field"><label>寬限期（年，最長5）</label><input type="number" id="graceYears" value="5" step="1" min="0" max="5"></div>
-    </div>
-    <div id="scheduleOut"></div>
-    <div class="note-box">試算採「一段式機動利率」逐年遞增估算（前3年1.775%，第4~6年每年+0.125碼，第7年起回復基準利率2.275%），僅供概念參考，實際核貸利率、成數與月付金以承貸銀行公告及對保文件為準。</div>
-  </section>
+// 3+3 利率遞減表：年利率(%), 該階段月數（不含文字敘述，年份由撥款年月動態計算）
+const RATE_STAGES = [
+  { rate: 1.775, months: 36 },
+  { rate: 1.9, months: 12 },
+  { rate: 2.025, months: 12 },
+  { rate: 2.15, months: 12 },
+  { rate: 2.275, months: Infinity },
+];
 
-  <footer class="note">
-    資料彙整日期：2026年7月18日。青安3.0尚未經財政部逐項正式公告細節，實際條件請以官方公告及承貸之8大公股銀行（臺灣銀行、土地銀行、第一銀行、華南銀行、彰化銀行、兆豐銀行、臺灣中小企業銀行、合作金庫）最終審核結果為準。<br>
-    台灣房屋 捷運樂善直營店　劉昭佑　經紀人 康博超　桃市經字第001240號
-  </footer>
+// 民國年月 <-> 絕對月數 互轉
+function rocToAbs(y, m) {
+  return y * 12 + (m - 1);
+}
+function absToRoc(abs) {
+  return { y: Math.floor(abs / 12), m: (abs % 12) + 1 };
+}
 
-</div>
+const ORANGE = "#E8700A";
 
-<script>
-(function(){
-  const $ = id => document.getElementById(id);
-  const nt = x => Math.round(x).toLocaleString('en-US');
+// ---------- 試算工具 ----------
+function monthlyPayment(balance, annualRatePct, remainingMonths) {
+  if (remainingMonths <= 0) return 0;
+  const r = annualRatePct / 100 / 12;
+  if (r === 0) return balance / remainingMonths;
+  return (balance * r) / (1 - Math.pow(1 + r, -remainingMonths));
+}
 
-  // 各年利率估算：前3年1.775%，第4~6年每年+0.125%，第7年起封頂於2.275%
-  function rateForYear(y){
-    if(y <= 3) return 1.775;
-    if(y >= 7) return 2.275;
-    return Math.min(2.275, 1.775 + (y-3)*0.125);
+function buildAmortizationStages(principal, totalYears, disburseYear, disburseMonth, graceYears = 0) {
+  const totalMonths = Math.round(totalYears * 12);
+  const graceMonths = Math.min(Math.round((Number(graceYears) || 0) * 12), totalMonths);
+
+  // 1. 依 RATE_STAGES 累計出每個利率區間的起訖月數（裁切至 totalMonths）
+  const rateBoundaries = [];
+  let cum = 0;
+  for (const stage of RATE_STAGES) {
+    if (cum >= totalMonths) break;
+    const dur = stage.months === Infinity ? totalMonths - cum : Math.min(stage.months, totalMonths - cum);
+    if (dur <= 0) continue;
+    rateBoundaries.push({ start: cum, end: cum + dur - 1, rate: stage.rate, openEnded: stage.months === Infinity });
+    cum += dur;
   }
+  const findBoundary = (m) =>
+    rateBoundaries.find((b) => m >= b.start && m <= b.end) || rateBoundaries[rateBoundaries.length - 1];
 
-  function monthlyPI(principal, annualRatePct, months){
-    const r = annualRatePct/100/12;
-    if(r === 0) return principal/months;
-    return principal * r * Math.pow(1+r, months) / (Math.pow(1+r, months) - 1);
-  }
+  // 2. 合併利率區間邊界與寬限期邊界，切出實際模擬用的子區間
+  const breakSet = new Set([0, totalMonths]);
+  rateBoundaries.forEach((b) => {
+    breakSet.add(b.start);
+    breakSet.add(b.end + 1);
+  });
+  if (graceMonths > 0 && graceMonths < totalMonths) breakSet.add(graceMonths);
+  const breaks = Array.from(breakSet)
+    .filter((x) => x >= 0 && x <= totalMonths)
+    .sort((a, b) => a - b);
 
-  function render(){
-    const loan = parseFloat($('loanAmt').value) || 0;
-    const years = Math.min(40, Math.max(1, parseFloat($('loanYears').value) || 40));
-    const grace = Math.min(5, Math.max(0, parseFloat($('graceYears').value) || 0));
-    const amortMonths = (years - grace) * 12;
+  // 3. 依序模擬每個子區間
+  let balance = principal;
+  let cursor = rocToAbs(disburseYear, disburseMonth);
+  let elapsed = 0;
+  const rows = [];
+  let totalInterestAll = 0;
+  let totalPrincipalAll = 0;
 
-    let rows = '';
-    for(let y=1; y<=Math.min(years,10); y++){
-      const rate = rateForYear(y);
-      let payment;
-      if(y <= grace){
-        payment = loan * rate/100/12; // 寬限期：只繳息
-      } else {
-        payment = monthlyPI(loan, rate, amortMonths);
-      }
-      rows += `<tr><td>第${y}年</td><td>${rate.toFixed(3)}%</td><td>${nt(payment)}</td></tr>`;
+  for (let i = 0; i < breaks.length - 1; i++) {
+    const start = breaks[i];
+    const end = breaks[i + 1] - 1;
+    const months = end - start + 1;
+    if (months <= 0) continue;
+
+    const boundary = findBoundary(start);
+    const rate = boundary.rate;
+    const r = rate / 100 / 12;
+    const isGrace = start < graceMonths;
+    const remainingFromHere = totalMonths - start;
+
+    const payment = isGrace ? balance * r : monthlyPayment(balance, rate, remainingFromHere);
+    const firstInterest = balance * r;
+    const firstPrincipal = isGrace ? 0 : payment - firstInterest;
+
+    let bal = balance;
+    let stageInterestSum = 0;
+    let stagePrincipalSum = 0;
+    for (let m = 0; m < months; m++) {
+      const interest = bal * r;
+      const principalPaid = isGrace ? 0 : payment - interest;
+      bal -= principalPaid;
+      stageInterestSum += interest;
+      stagePrincipalSum += principalPaid;
     }
 
-    $('scheduleOut').innerHTML = `
-      <div class="result-band">
-        <div class="lab">寬限期內每月付息（第1年，利率1.775%）<small>僅繳利息，本金未攤還</small></div>
-        <div class="num">NT$ ${nt(grace>0 ? loan*1.775/100/12 : monthlyPI(loan,1.775,amortMonths))}</div>
-      </div>
-      <table class="sched">
-        <thead><tr><th>期間</th><th>估算利率</th><th>估算月付金 (NT$)</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
+    const startDate = absToRoc(cursor);
+    const endDate = absToRoc(cursor + months - 1);
+    const baseLabel =
+      boundary.openEnded && end === totalMonths - 1
+        ? `民國${startDate.y}年${startDate.m}月起`
+        : startDate.y === endDate.y
+        ? `民國${startDate.y}年`
+        : `民國${startDate.y}-${endDate.y}年`;
+    const label = isGrace ? `${baseLabel}（寬限期）` : baseLabel;
+
+    rows.push({
+      label,
+      rate,
+      months,
+      isGrace,
+      payment: Math.round(payment),
+      firstInterest: Math.round(firstInterest),
+      firstPrincipal: Math.round(firstPrincipal),
+      stageInterestSum: Math.round(stageInterestSum),
+      stagePrincipalSum: Math.round(stagePrincipalSum),
+      stageTotalPayment: Math.round(payment * months),
+      balanceAfter: Math.max(Math.round(bal), 0),
+      elapsedStart: elapsed,
+      elapsedEnd: elapsed + months - 1,
+    });
+
+    totalInterestAll += stageInterestSum;
+    totalPrincipalAll += stagePrincipalSum;
+    balance = bal;
+    cursor += months;
+    elapsed += months;
   }
 
-  document.querySelectorAll('input').forEach(el=> el.addEventListener('input', render));
-  render();
-})();
+  return {
+    rows,
+    totals: {
+      totalInterest: Math.round(totalInterestAll),
+      totalPrincipal: Math.round(totalPrincipalAll),
+      totalPayment: Math.round(totalInterestAll + totalPrincipalAll),
+    },
+  };
+}
+
+function flatAmortization(principal, years, annualRatePct, graceYears = 0) {
+  const totalMonths = Math.round(years * 12);
+  const graceMonths = Math.min(Math.round((Number(graceYears) || 0) * 12), totalMonths);
+  const r = annualRatePct / 100 / 12;
+
+  if (graceMonths > 0) {
+    const gracePayment = principal * r;
+    const remainingMonths = totalMonths - graceMonths;
+    const postPayment = monthlyPayment(principal, annualRatePct, remainingMonths);
+    const totalInterestGrace = gracePayment * graceMonths;
+    const totalPaidPost = postPayment * remainingMonths;
+    const totalInterestPost = totalPaidPost - principal;
+    return {
+      hasGrace: true,
+      graceMonths,
+      gracePayment: Math.round(gracePayment),
+      payment: Math.round(postPayment),
+      postFirstInterest: Math.round(principal * r),
+      postFirstPrincipal: Math.round(postPayment - principal * r),
+      totalInterest: Math.round(totalInterestGrace + totalInterestPost),
+      totalPaid: Math.round(totalInterestGrace + totalPaidPost),
+      months: totalMonths,
+    };
+  }
+
+  const payment = monthlyPayment(principal, annualRatePct, totalMonths);
+  const totalPaid = payment * totalMonths;
+  const totalInterest = totalPaid - principal;
+  const firstInterest = principal * r;
+  const firstPrincipal = payment - firstInterest;
+  return {
+    hasGrace: false,
+    payment: Math.round(payment),
+    totalPaid: Math.round(totalPaid),
+    totalInterest: Math.round(totalInterest),
+    firstInterest: Math.round(firstInterest),
+    firstPrincipal: Math.round(firstPrincipal),
+    months: totalMonths,
+  };
+}
+
+// 查詢一般房貸在第 elapsedMonth 個月（0起算）當下的本金/利息拆算，供混合貸款各階段卡片使用
+function generalLoanStateAtMonth(principal, annualRatePct, totalMonths, graceMonths, elapsedMonth) {
+  if (elapsedMonth >= totalMonths) return null;
+  const r = annualRatePct / 100 / 12;
+
+  if (elapsedMonth < graceMonths) {
+    const interest = principal * r;
+    return { interest: Math.round(interest), principal: 0, payment: Math.round(interest), isGrace: true };
+  }
+
+  const remainingAtGraceEnd = totalMonths - graceMonths;
+  const payment = monthlyPayment(principal, annualRatePct, remainingAtGraceEnd);
+  const m = elapsedMonth - graceMonths;
+  const growth = Math.pow(1 + r, m);
+  const balance = r === 0 ? principal - payment * m : principal * growth - payment * ((growth - 1) / r);
+  const interest = balance * r;
+  const principalPortion = payment - interest;
+  return {
+    interest: Math.round(interest),
+    principal: Math.round(principalPortion),
+    payment: Math.round(payment),
+    isGrace: false,
+  };
+}
+
+const fmt = (n) => (isFinite(n) ? n.toLocaleString("zh-TW") : "-");
+
+// ---------- 表單元件 ----------
+function Field({ label, children, hint }) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
+      {children}
+      {hint && <p className="text-xs text-neutral-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+function YesNoToggle({ value, onChange }) {
+  return (
+    <div className="flex gap-2">
+      {[
+        { v: true, t: "是" },
+        { v: false, t: "否" },
+      ].map((opt) => (
+        <button
+          key={String(opt.v)}
+          type="button"
+          onClick={() => onChange(opt.v)}
+          className={`flex-1 py-2 rounded-lg border text-sm font-medium transition ${
+            value === opt.v
+              ? "text-white border-transparent"
+              : "bg-white text-neutral-600 border-neutral-300"
+          }`}
+          style={value === opt.v ? { backgroundColor: ORANGE } : {}}
+        >
+          {opt.t}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function NumberInput({ value, onChange, placeholder, suffix }) {
+  return (
+    <div className="relative">
+      <input
+        type="number"
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-neutral-300 px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2"
+        style={{ "--tw-ring-color": ORANGE }}
+      />
+      {suffix && (
+        <span className="absolute right-3 top-2.5 text-xs text-neutral-400">{suffix}</span>
+      )}
+    </div>
+  );
+}
+
+// ---------- 主程式 ----------
+function App() {
+  const [step, setStep] = useState("form"); // form | result
+  const [form, setForm] = useState({
+    age: "",
+    termYears: "40",
+    income: "",
+    city: "新北市",
+    address: "",
+    price: "",
+    noOwnership: null,
+    selfUse: null,
+    firstTime: null,
+    familyType: "general",
+    ltv: "80",
+    desiredLoan: "",
+    disburseYear: "115",
+    disburseMonth: "8",
+    graceYears: "0",
+  });
+
+  const [generalLoan, setGeneralLoan] = useState({
+    amount: "",
+    years: "30",
+    rate: "2.2",
+    ltv: "70",
+    bank: "",
+    note: "",
+    graceYears: "0",
+  });
+
+  const [blend, setBlend] = useState({
+    enabled: false,
+    amount: "",
+    years: "20",
+    rate: "2.2",
+    bank: "",
+    graceYears: "0",
+  });
+
+  const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const requiredFilled = useMemo(() => {
+    return (
+      form.age !== "" &&
+      form.termYears !== "" &&
+      form.income !== "" &&
+      form.price !== "" &&
+      form.noOwnership !== null &&
+      form.selfUse !== null &&
+      form.firstTime !== null
+    );
+  }, [form]);
+
+  const evaluation = useMemo(() => {
+    if (!requiredFilled) return null;
+    const age = Number(form.age);
+    const term = Number(form.termYears);
+    const income = Number(form.income);
+    const price = Number(form.price);
+    const cap = CITY_CAP[form.city];
+
+    const checks = [
+      {
+        label: "本人、配偶及未成年子女名下皆無自有住宅",
+        pass: form.noOwnership === true,
+        detail: form.noOwnership === true ? "符合" : "現況名下有房，不符青安基本資格",
+      },
+      {
+        label: "購屋需自住並可簽自住切結書",
+        pass: form.selfUse === true,
+        detail: form.selfUse === true ? "符合" : "非自住用途，不符資格",
+      },
+      {
+        label: "借款人一生限貸1次（尚未申請過本貸款）",
+        pass: form.firstTime === true,
+        detail: form.firstTime === true ? "符合" : "已使用過青安貸款額度，不可再申請",
+      },
+      {
+        label: "申貸時未滿50歲",
+        pass: age > 0 && age < 50,
+        detail: age >= 50 ? `目前 ${age} 歲，已滿50歲不符資格` : "符合",
+      },
+      {
+        label: "申貸年齡＋核貸年限 ≤ 80",
+        pass: age > 0 && term > 0 && age + term <= 80,
+        detail:
+          age + term > 80
+            ? `${age} + ${term} = ${age + term}，超過80，需縮短年限至 ${Math.max(80 - age, 0)} 年以內`
+            : "符合",
+      },
+      {
+        label: "貸款年限 ≤ 40 年",
+        pass: term > 0 && term <= 40,
+        detail: term > 40 ? "超過最長40年" : "符合",
+      },
+      {
+        label: "借款人本人年所得 ≤ 200 萬元",
+        pass: income > 0 && income <= 200,
+        detail: income > 200 ? `年所得 ${income} 萬，超過200萬上限` : "符合",
+      },
+      {
+        label: `購屋總價（含鑑價）≤ 該區域上限 ${cap} 萬元`,
+        pass: price > 0 && price <= cap,
+        detail: price > cap ? `總價 ${price} 萬，超過 ${form.city} 上限 ${cap} 萬` : "符合",
+      },
+    ];
+
+    const eligible = checks.every((c) => c.pass);
+    const familyCap = FAMILY_TYPE[form.familyType].cap;
+    const ltv = Number(form.ltv) > 0 ? Math.min(Number(form.ltv), 80) : 80;
+    const byLtv = price > 0 ? Math.round(price * (ltv / 100)) : 0;
+    const suggestedLoan = Math.min(familyCap, byLtv || familyCap);
+    const desired = Number(form.desiredLoan) || suggestedLoan;
+    const finalLoan = Math.min(desired, familyCap, byLtv || Infinity);
+
+    let amortRows = [];
+    let amortTotals = null;
+    if (eligible && finalLoan > 0 && term > 0) {
+      const dy = Number(form.disburseYear) || 115;
+      const dm = Number(form.disburseMonth) || 8;
+      const result = buildAmortizationStages(finalLoan * 10000, term, dy, dm, Number(form.graceYears) || 0);
+      amortRows = result.rows;
+      amortTotals = result.totals;
+    }
+
+    return { checks, eligible, cap, familyCap, suggestedLoan, finalLoan, amortRows, amortTotals, ltv };
+  }, [form, requiredFilled]);
+
+  const generalResult = useMemo(() => {
+    const amount = Number(generalLoan.amount);
+    const years = Number(generalLoan.years);
+    const rate = Number(generalLoan.rate);
+    if (!amount || !years || !rate) return null;
+    return flatAmortization(amount * 10000, years, rate, Number(generalLoan.graceYears) || 0);
+  }, [generalLoan]);
+
+  const blendResult = useMemo(() => {
+    if (!blend.enabled) return null;
+    const amount = Number(blend.amount);
+    const years = Number(blend.years);
+    const rate = Number(blend.rate);
+    if (!amount || !years || !rate) return null;
+    return flatAmortization(amount * 10000, years, rate, Number(blend.graceYears) || 0);
+  }, [blend]);
+
+  const blendGapSuggestion = useMemo(() => {
+    if (!evaluation || !evaluation.eligible) return 0;
+    const desired = Number(form.desiredLoan) || 0;
+    const gap = desired - evaluation.finalLoan;
+    return gap > 0 ? Math.round(gap) : 0;
+  }, [evaluation, form.desiredLoan]);
+
+  const resetAll = () => {
+    setStep("form");
+    setForm({
+      age: "",
+      termYears: "40",
+      income: "",
+      city: "新北市",
+      address: "",
+      price: "",
+      noOwnership: null,
+      selfUse: null,
+      firstTime: null,
+      familyType: "general",
+      ltv: "80",
+      desiredLoan: "",
+      disburseYear: "115",
+      disburseMonth: "8",
+      graceYears: "0",
+    });
+    setGeneralLoan({ amount: "", years: "30", rate: "2.2", ltv: "70", bank: "", note: "", graceYears: "0" });
+    setBlend({ enabled: false, amount: "", years: "20", rate: "2.2", bank: "", graceYears: "0" });
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-50 pb-16">
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white !important; }
+          .print-card { break-inside: avoid; }
+          .print-header-block { display: block !important; }
+        }
+      `}</style>
+      {/* Header */}
+      <div className="no-print text-white px-5 py-5 sticky top-0 z-10 shadow-sm" style={{ backgroundColor: ORANGE }}>
+        <div className="flex items-center gap-2">
+          <Home size={20} />
+          <h1 className="text-lg font-bold">新青安3.0 資格快速試算</h1>
+        </div>
+        <p className="text-xs text-white/85 mt-1">客戶自評條件 → 判定適用方案／利率，或轉入一般房貸試算</p>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 pt-5">
+        {step === "form" && (
+          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-5">
+            <Field label="借款人年齡（申貸時，週歲）">
+              <NumberInput value={form.age} onChange={(v) => update("age", v)} placeholder="例：35" suffix="歲" />
+            </Field>
+
+            <Field label="預估撥款年月（民國）" hint="用於計算每階段利率對應的實際年份，預設為3.0上路日115年8月">
+              <div className="flex gap-2">
+                <NumberInput value={form.disburseYear} onChange={(v) => update("disburseYear", v)} placeholder="115" suffix="年" />
+                <NumberInput value={form.disburseMonth} onChange={(v) => update("disburseMonth", v)} placeholder="8" suffix="月" />
+              </div>
+            </Field>
+
+            <Field label="希望貸款年限" hint="青安最長40年，實際核貸須符合「年齡＋年限≤80」">
+              <NumberInput value={form.termYears} onChange={(v) => update("termYears", v)} placeholder="例：40" suffix="年" />
+            </Field>
+
+            <Field label="新青安寬限期" hint="最長5年，期間僅繳利息、本金不攤還；不需要可填0">
+              <NumberInput value={form.graceYears} onChange={(v) => update("graceYears", v)} placeholder="0" suffix="年" />
+            </Field>
+
+            <Field label="借款人本人年所得總額" hint="不含配偶，僅計算本人">
+              <NumberInput value={form.income} onChange={(v) => update("income", v)} placeholder="例：80" suffix="萬" />
+            </Field>
+
+            <Field label="購屋所在縣市">
+              <select
+                value={form.city}
+                onChange={(e) => update("city", e.target.value)}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white"
+              >
+                {Object.keys(CITY_CAP).map((c) => (
+                  <option key={c} value={c}>
+                    {c}（上限 {CITY_CAP[c]} 萬）
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="房屋地址（選填，會顯示在輸出的PDF報告上）">
+              <input
+                type="text"
+                value={form.address}
+                onChange={(e) => update("address", e.target.value)}
+                placeholder="例：新北市林口區OO路OO號"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              />
+            </Field>
+
+            <Field label="房屋總價（或預估銀行鑑價，取兩者較高者）">
+              <NumberInput value={form.price} onChange={(v) => update("price", v)} placeholder="例：1800" suffix="萬" />
+            </Field>
+
+            <Field label="本人、配偶及未成年子女名下皆無自有住宅？">
+              <YesNoToggle value={form.noOwnership} onChange={(v) => update("noOwnership", v)} />
+            </Field>
+
+            <Field label="購屋是否自住（可簽自住切結書）？">
+              <YesNoToggle value={form.selfUse} onChange={(v) => update("selfUse", v)} />
+            </Field>
+
+            <Field label="是否為第一次申請本貸款（尚未使用過青安額度）？">
+              <YesNoToggle value={form.firstTime} onChange={(v) => update("firstTime", v)} />
+            </Field>
+
+            <Field label="家庭類型" hint="影響貸款額度上限與利息補貼金額">
+              <div className="grid grid-cols-1 gap-2">
+                {Object.entries(FAMILY_TYPE).map(([k, v]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => update("familyType", k)}
+                    className={`text-left px-3 py-2 rounded-lg border text-sm ${
+                      form.familyType === k ? "border-transparent text-white" : "bg-white border-neutral-300 text-neutral-700"
+                    }`}
+                    style={form.familyType === k ? { backgroundColor: ORANGE } : {}}
+                  >
+                    {v.label}（上限 {v.cap} 萬）
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="預估貸款成數" hint="最高80成，可依客戶自備款狀況調整">
+              <NumberInput value={form.ltv} onChange={(v) => update("ltv", v)} placeholder="例：80" suffix="%" />
+            </Field>
+
+            <Field label="客戶希望貸款金額（選填）" hint="留空則以額度上限與成數試算出的建議金額為準">
+              <NumberInput value={form.desiredLoan} onChange={(v) => update("desiredLoan", v)} placeholder="例：1200" suffix="萬" />
+            </Field>
+
+            <button
+              disabled={!requiredFilled}
+              onClick={() => setStep("result")}
+              className={`w-full mt-2 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-1 transition ${
+                requiredFilled ? "" : "opacity-40"
+              }`}
+              style={{ backgroundColor: ORANGE }}
+            >
+              判定資格 <ChevronRight size={18} />
+            </button>
+            {!requiredFilled && (
+              <p className="text-xs text-center text-neutral-400 mt-2">請先完整填寫上方標示的必填欄位</p>
+            )}
+          </div>
+        )}
+
+        {step === "result" && evaluation && (
+          <div className="space-y-4">
+            {/* 純文字版列印標頭，只在列印/PDF時顯示，避免橘色底色不列印時白字看不見 */}
+            <div className="hidden print-header-block pb-2 border-b border-neutral-300">
+              <h1 className="text-xl font-bold text-neutral-800">新青安3.0 資格試算報告</h1>
+              <p className="text-xs text-neutral-400 mt-1">
+                產生日期：{new Date().toLocaleDateString("zh-TW")}
+              </p>
+            </div>
+
+            {/* 列印/匯出PDF 按鈕 */}
+            <button
+              onClick={() => window.print()}
+              className="no-print w-full py-2.5 rounded-xl font-medium border flex items-center justify-center gap-1.5 text-sm"
+              style={{ borderColor: ORANGE, color: ORANGE }}
+            >
+              <Printer size={16} /> 列印 / 匯出 PDF
+            </button>
+
+            {/* 案件資訊：房屋地址與購屋總價 */}
+            {(form.address || form.price) && (
+              <div className="print-card bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+                <p className="text-sm font-semibold text-neutral-700 mb-2">案件資訊</p>
+                <div className="text-sm space-y-1">
+                  {form.address && (
+                    <p className="text-neutral-600">
+                      <span className="text-neutral-400">房屋地址：</span>
+                      {form.address}
+                    </p>
+                  )}
+                  {form.price && (
+                    <p className="text-neutral-600">
+                      <span className="text-neutral-400">購屋總價：</span>
+                      {fmt(Number(form.price))} 萬元
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 判定總結卡片 */}
+            <div
+              className={`rounded-2xl p-5 text-white shadow-sm ${evaluation.eligible ? "" : "bg-neutral-700"}`}
+              style={evaluation.eligible ? { backgroundColor: "#1E8E5A" } : {}}
+            >
+              <div className="flex items-center gap-2">
+                {evaluation.eligible ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                <span className="text-lg font-bold">
+                  {evaluation.eligible ? "符合新青安3.0申請資格" : "不符合新青安3.0申請資格"}
+                </span>
+              </div>
+              {evaluation.eligible && (
+                <p className="text-sm text-white/90 mt-1">
+                  適用方案：{FAMILY_TYPE[form.familyType].label}
+                </p>
+              )}
+            </div>
+
+            {/* 條件檢核清單 */}
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+              <p className="text-sm font-semibold text-neutral-700 mb-3">條件檢核明細</p>
+              <div className="space-y-2">
+                {evaluation.checks.map((c, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    {c.pass ? (
+                      <CheckCircle2 size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                    )}
+                    <div>
+                      <p className={c.pass ? "text-neutral-700" : "text-red-600 font-medium"}>{c.label}</p>
+                      <p className="text-xs text-neutral-400">{c.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {evaluation.eligible ? (
+              <>
+                {/* 額度與利率 */}
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+                  <p className="text-sm font-semibold text-neutral-700 mb-3">額度與利率</p>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-neutral-50 rounded-lg p-3">
+                      <p className="text-xs text-neutral-400">方案額度上限</p>
+                      <p className="text-lg font-bold" style={{ color: ORANGE }}>
+                        {evaluation.familyCap} 萬
+                      </p>
+                    </div>
+                    <div className="bg-neutral-50 rounded-lg p-3">
+                      <p className="text-xs text-neutral-400">依成數({evaluation.ltv}%)試算可貸</p>
+                      <p className="text-lg font-bold" style={{ color: ORANGE }}>
+                        {fmt(Math.round(Number(form.price) * (evaluation.ltv / 100)))} 萬
+                      </p>
+                    </div>
+                    <div className="bg-neutral-50 rounded-lg p-3 col-span-2">
+                      <p className="text-xs text-neutral-400">建議貸款金額（取兩者及客戶期望較低者）</p>
+                      <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                        {fmt(evaluation.finalLoan)} 萬元
+                      </p>
+                    </div>
+                    <div className="bg-neutral-50 rounded-lg p-3 col-span-2">
+                      <p className="text-xs text-neutral-400">目前優惠後利率（前3年）</p>
+                      <p className="text-lg font-bold text-neutral-700">1.775%</p>
+                      <p className="text-xs text-neutral-400 mt-0.5">
+                        銀行減收0.5碼＋政府補貼1.5碼，以中華郵政2年期定儲機動利率為基準，將隨基準調整
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 混合貸款設定 */}
+                <div className="print-card bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-semibold text-neutral-700">搭配一般房貸（混合貸款）</p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBlend((b) => ({
+                          ...b,
+                          enabled: !b.enabled,
+                          amount: b.amount || String(blendGapSuggestion || ""),
+                        }))
+                      }
+                      className={`no-print text-xs px-3 py-1.5 rounded-full font-medium ${
+                        blend.enabled ? "text-white" : "bg-neutral-100 text-neutral-500"
+                      }`}
+                      style={blend.enabled ? { backgroundColor: ORANGE } : {}}
+                    >
+                      {blend.enabled ? "已啟用" : "未啟用"}
+                    </button>
+                  </div>
+                  <p className="no-print text-xs text-neutral-400 mb-3">
+                    當客戶實際需求金額超過新青安額度上限（{evaluation.familyCap} 萬）時，差額可另外搭配一般房貸方案（利率／年限獨立設定）
+                  </p>
+
+                  {blend.enabled && (
+                    <>
+                      <div className="no-print">
+                        {blendGapSuggestion > 0 && (
+                          <p className="text-xs mb-3" style={{ color: ORANGE }}>
+                            依客戶期望總額 {form.desiredLoan || "-"} 萬 － 新青安 {evaluation.finalLoan} 萬，建議一般房貸金額約 {blendGapSuggestion} 萬（已預填，可自行調整）
+                          </p>
+                        )}
+                        <Field label="一般房貸金額">
+                          <NumberInput
+                            value={blend.amount}
+                            onChange={(v) => setBlend((b) => ({ ...b, amount: v }))}
+                          placeholder="例：500"
+                          suffix="萬"
+                        />
+                      </Field>
+                      <Field label="一般房貸年限">
+                        <NumberInput
+                          value={blend.years}
+                          onChange={(v) => setBlend((b) => ({ ...b, years: v }))}
+                          placeholder="例：20"
+                          suffix="年"
+                        />
+                      </Field>
+                      <Field label="一般房貸利率">
+                        <NumberInput
+                          value={blend.rate}
+                          onChange={(v) => setBlend((b) => ({ ...b, rate: v }))}
+                          placeholder="例：2.2"
+                          suffix="%"
+                        />
+                      </Field>
+                      <Field label="一般房貸寬限期" hint="期間僅繳利息、本金不攤還；不需要可填0">
+                        <NumberInput
+                          value={blend.graceYears}
+                          onChange={(v) => setBlend((b) => ({ ...b, graceYears: v }))}
+                          placeholder="0"
+                          suffix="年"
+                        />
+                      </Field>
+                      <Field label="承作銀行（選填）">
+                        <input
+                          type="text"
+                          value={blend.bank}
+                          onChange={(e) => setBlend((b) => ({ ...b, bank: e.target.value }))}
+                          placeholder="例：OO銀行"
+                          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                        />
+                      </Field>
+                      </div>
+
+                      {blendResult && (
+                        <div className="rounded-lg p-3 mt-1" style={{ backgroundColor: "#FFF3E8" }}>
+                          <p className="text-xs font-semibold text-neutral-600 mb-2">
+                            混合貸款總覽：新青安 {evaluation.finalLoan} 萬 ＋ 一般房貸 {blend.amount} 萬{blend.bank ? `（${blend.bank}）` : ""} ＝ 總貸款 {fmt(evaluation.finalLoan + Number(blend.amount))} 萬
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-center mb-2">
+                            <div className="bg-white rounded-lg p-2">
+                              <p className="text-[10px] text-neutral-400">目前合計月付金</p>
+                              <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                                {fmt(
+                                  (evaluation.amortRows[0]?.payment || 0) +
+                                    (blendResult.hasGrace ? blendResult.gracePayment : blendResult.payment)
+                                )}
+                              </p>
+                              <p className="text-[10px] text-neutral-400 mt-0.5">
+                                青安{fmt(evaluation.amortRows[0]?.payment || 0)}
+                                {evaluation.amortRows[0]?.isGrace ? "(寬限期)" : ""}＋一般
+                                {fmt(blendResult.hasGrace ? blendResult.gracePayment : blendResult.payment)}
+                                {blendResult.hasGrace ? "(寬限期)" : ""}
+                              </p>
+                            </div>
+                            <div className="bg-white rounded-lg p-2">
+                              <p className="text-[10px] text-neutral-400">全期總利息合計</p>
+                              <p className="text-sm font-semibold text-neutral-700">
+                                {fmt((evaluation.amortTotals?.totalInterest || 0) + blendResult.totalInterest)}
+                              </p>
+                              <p className="text-[10px] text-neutral-400 mt-0.5">
+                                青安{fmt(evaluation.amortTotals?.totalInterest || 0)}＋一般{fmt(blendResult.totalInterest)}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 flex items-start gap-1">
+                            <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+                            若兩筆寬限期或年限不同，合計月付金會隨時間變化；下方各階段卡片已逐一列出每個時期實際的合計金額。
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* 3+3利率遞減試算表 */}
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+                  <p className="text-sm font-semibold text-neutral-700 mb-1">「3+3」利息補貼遞減試算</p>
+                  <p className="text-xs text-neutral-400 mb-3">
+                    以貸款 {fmt(evaluation.finalLoan)} 萬元、年限 {form.termYears} 年、預估民國{form.disburseYear}年{form.disburseMonth}月撥款試算，每月還款金額隨補貼遞減調整
+                  </p>
+                  <div className="space-y-2">
+                    {evaluation.amortRows.map((row, i) => {
+                      const generalMonths = blendResult ? Number(blend.years) * 12 : 0;
+                      const generalGraceMonths = blendResult ? Math.min(Math.round((Number(blend.graceYears) || 0) * 12), generalMonths) : 0;
+                      const blendActive = blendResult && row.elapsedStart < generalMonths;
+                      const generalState = blendActive
+                        ? generalLoanStateAtMonth(
+                            Number(blend.amount) * 10000,
+                            Number(blend.rate),
+                            generalMonths,
+                            generalGraceMonths,
+                            row.elapsedStart
+                          )
+                        : null;
+                      const combinedTotal = row.payment + (generalState ? generalState.payment : 0);
+
+                      return (
+                        <div key={i} className="rounded-lg border border-neutral-200 p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-neutral-600">{row.label}</span>
+                            <span className="text-xs text-neutral-400">利率 {row.rate}%</span>
+                          </div>
+
+                          <div className={`grid ${generalState ? "grid-cols-2 gap-3" : ""}`}>
+                            <div>
+                              <p className="text-[10px] text-neutral-400 mb-1">新青安</p>
+                              <div className="grid grid-cols-2 gap-1 text-center">
+                                <div>
+                                  <p className="text-[10px] text-neutral-400">本金</p>
+                                  <p className="text-xs font-semibold text-neutral-700">{fmt(row.firstPrincipal)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-neutral-400">利息</p>
+                                  <p className="text-xs font-semibold text-neutral-700">{fmt(row.firstInterest)}</p>
+                                </div>
+                              </div>
+                              <p className="text-center text-xs text-neutral-500 mt-1">月付 {fmt(row.payment)}</p>
+                            </div>
+
+                            {generalState && (
+                              <div className="border-l border-neutral-100 pl-3">
+                                <p className="text-[10px] text-neutral-400 mb-1">
+                                  一般房貸{generalState.isGrace ? "（寬限期）" : ""}
+                                </p>
+                                <div className="grid grid-cols-2 gap-1 text-center">
+                                  <div>
+                                    <p className="text-[10px] text-neutral-400">本金</p>
+                                    <p className="text-xs font-semibold text-neutral-700">{fmt(generalState.principal)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[10px] text-neutral-400">利息</p>
+                                    <p className="text-xs font-semibold text-neutral-700">{fmt(generalState.interest)}</p>
+                                  </div>
+                                </div>
+                                <p className="text-center text-xs text-neutral-500 mt-1">月付 {fmt(generalState.payment)}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {blendResult && !blendActive && (
+                            <p className="text-[11px] text-neutral-400 mt-2">一般房貸已於此階段前繳清，僅需繳青安部分</p>
+                          )}
+
+                          <div className="mt-2 pt-2 border-t border-neutral-100 text-center">
+                            <p className="text-[10px] text-neutral-400">合計</p>
+                            <p className="text-2xl font-bold" style={{ color: ORANGE }}>
+                              {fmt(combinedTotal)}
+                            </p>
+                          </div>
+
+                          <div className="mt-2 pt-2 border-t border-neutral-100 text-[11px] text-neutral-400 flex justify-between">
+                            <span>本階段共 {row.months === Infinity ? "至還清" : `${row.months} 期`}</span>
+                            <span>
+                              青安期間本金 {fmt(row.stagePrincipalSum)}＋利息 {fmt(row.stageInterestSum)} ＝ {fmt(row.stageTotalPayment)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {evaluation.amortTotals && (
+                    <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "#FFF3E8" }}>
+                      <p className="text-xs font-semibold text-neutral-600 mb-2">全期加總（本金 {fmt(evaluation.finalLoan)}萬，年限{form.termYears}年）</p>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                          <p className="text-[10px] text-neutral-400">本金合計</p>
+                          <p className="text-sm font-semibold text-neutral-700">{fmt(evaluation.amortTotals.totalPrincipal)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-neutral-400">利息合計</p>
+                          <p className="text-sm font-semibold text-neutral-700">{fmt(evaluation.amortTotals.totalInterest)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-neutral-400">總繳金額</p>
+                          <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                            {fmt(evaluation.amortTotals.totalPayment)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-neutral-400 mt-2 flex items-start gap-1">
+                    <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+                    第4年起利率為估算值，實際依中華郵政2年期定儲機動利率調整；月付金為每階段依當時剩餘本金與剩餘年限重新試算之等額本息金額，僅供參考，實際以銀行核貸為準。
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* 不符合時的原因摘要 + 一般房貸表單 */}
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800">
+                  客戶不符合新青安3.0資格，請改以一般房貸方案評估，並填寫下方資訊供試算。
+                </div>
+
+                <div className="print-card bg-white rounded-2xl shadow-sm border border-neutral-200 p-5">
+                  <p className="text-sm font-semibold text-neutral-700 mb-3">一般房貸資訊</p>
+
+                  <div className="no-print">
+                    <Field label="貸款金額">
+                      <NumberInput
+                        value={generalLoan.amount}
+                        onChange={(v) => setGeneralLoan((g) => ({ ...g, amount: v }))}
+                        placeholder="例：1500"
+                        suffix="萬"
+                      />
+                    </Field>
+                    <Field label="貸款年限">
+                      <NumberInput
+                        value={generalLoan.years}
+                        onChange={(v) => setGeneralLoan((g) => ({ ...g, years: v }))}
+                        placeholder="例：30"
+                        suffix="年"
+                      />
+                    </Field>
+                    <Field label="預估年利率">
+                      <NumberInput
+                        value={generalLoan.rate}
+                        onChange={(v) => setGeneralLoan((g) => ({ ...g, rate: v }))}
+                        placeholder="例：2.2"
+                        suffix="%"
+                      />
+                    </Field>
+                    <Field label="貸款成數">
+                      <NumberInput
+                        value={generalLoan.ltv}
+                        onChange={(v) => setGeneralLoan((g) => ({ ...g, ltv: v }))}
+                        placeholder="例：70"
+                        suffix="%"
+                      />
+                    </Field>
+                    <Field label="寬限期" hint="期間僅繳利息、本金不攤還；不需要可填0">
+                    <NumberInput
+                      value={generalLoan.graceYears}
+                      onChange={(v) => setGeneralLoan((g) => ({ ...g, graceYears: v }))}
+                      placeholder="0"
+                      suffix="年"
+                    />
+                  </Field>
+                  <Field label="承作銀行 / 方案名稱（選填）">
+                    <input
+                      type="text"
+                      value={generalLoan.bank}
+                      onChange={(e) => setGeneralLoan((g) => ({ ...g, bank: e.target.value }))}
+                      placeholder="例：OO銀行 一般房貸方案"
+                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                    />
+                  </Field>
+                  <Field label="備註（選填）">
+                    <textarea
+                      value={generalLoan.note}
+                      onChange={(e) => setGeneralLoan((g) => ({ ...g, note: e.target.value }))}
+                      placeholder="例：客戶名下另有一戶，需先處分 / 需搭配理財型房貸..."
+                      rows={2}
+                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                    />
+                  </Field>
+                  </div>
+
+                  {(generalLoan.bank || generalLoan.note) && (
+                    <div className="text-xs text-neutral-500 mb-2 space-y-0.5">
+                      {generalLoan.bank && <p>承作銀行／方案：{generalLoan.bank}</p>}
+                      {generalLoan.note && <p>備註：{generalLoan.note}</p>}
+                    </div>
+                  )}
+
+                  {generalResult && (
+                    <div className="mt-3 space-y-2">
+                      {generalResult.hasGrace && (
+                        <div className="rounded-lg border border-dashed border-neutral-300 p-3">
+                          <p className="text-[10px] text-neutral-400 mb-2 text-center">
+                            寬限期內（共 {generalResult.graceMonths} 期，僅繳息）
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 text-center items-end">
+                            <div>
+                              <p className="text-[10px] text-neutral-400">本金</p>
+                              <p className="text-sm font-semibold text-neutral-700">0</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-neutral-400">利息</p>
+                              <p className="text-sm font-semibold text-neutral-700">{fmt(generalResult.gracePayment)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-neutral-400">合計</p>
+                              <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                                {fmt(generalResult.gracePayment)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div className="rounded-lg border border-neutral-200 p-3">
+                        <p className="text-[10px] text-neutral-400 mb-2 text-center">
+                          {generalResult.hasGrace ? "寬限期後每月還款拆算" : "每月還款拆算"}
+                        </p>
+                        <div className="grid grid-cols-3 gap-2 text-center items-end">
+                          <div>
+                            <p className="text-[10px] text-neutral-400">本金</p>
+                            <p className="text-sm font-semibold text-neutral-700">
+                              {fmt(generalResult.hasGrace ? generalResult.postFirstPrincipal : generalResult.firstPrincipal)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-400">利息</p>
+                            <p className="text-sm font-semibold text-neutral-700">
+                              {fmt(generalResult.hasGrace ? generalResult.postFirstInterest : generalResult.firstInterest)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-400">合計</p>
+                            <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                              {fmt(generalResult.payment)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg p-3" style={{ backgroundColor: "#FFF3E8" }}>
+                        <p className="text-[10px] text-neutral-400 mb-2 text-center">全期加總</p>
+                        <div className="grid grid-cols-3 gap-2 text-center items-end">
+                          <div>
+                            <p className="text-[10px] text-neutral-400">本金合計</p>
+                            <p className="text-sm font-semibold text-neutral-700">{fmt(Number(generalLoan.amount) * 10000)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-400">利息合計</p>
+                            <p className="text-sm font-semibold text-neutral-700">{fmt(generalResult.totalInterest)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-neutral-400">總繳金額</p>
+                            <p className="text-xl font-bold" style={{ color: ORANGE }}>
+                              {fmt(generalResult.totalPaid)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            <button
+              onClick={resetAll}
+              className="no-print w-full py-3 rounded-xl font-semibold border border-neutral-300 text-neutral-600 flex items-center justify-center gap-1 bg-white"
+            >
+              <RotateCcw size={16} /> 重新試算下一位客戶
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
 </script>
 </body>
 </html>
