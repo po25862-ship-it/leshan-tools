@@ -154,7 +154,10 @@
       <h1>買方應付價金試算</h1>
       <div class="sub">台灣房屋 捷運樂善直營店．承辦經紀人員：劉昭佑</div>
     </div>
-    <div class="tag">買方成本試算</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="tag">買方成本試算</div>
+      <button type="button" id="resetFormBtn" style="font-size:.78rem; border:1px solid #8a3b2b; color:#8a3b2b; background:#fff; padding:5px 12px; border-radius:999px; cursor:pointer; font-weight:600; white-space:nowrap;">🔄 清空重填</button>
+    </div>
   </header>
 
   <section>
@@ -333,6 +336,23 @@
 
   document.querySelectorAll('input').forEach(el=> el.addEventListener('input', render));
   $('printBtn').addEventListener('click', ()=>{ render(); window.print(); });
+
+  function resetForm(){
+    // 物件／買方姓名：清成空白（每個客戶都不同，不留上一位的資料）
+    $('caseName').value = '';
+    $('buyerName').value = '';
+    // 其餘試算參數：回復到預設範例數字，方便下一次直接調整
+    document.querySelectorAll('input[type=number]').forEach(el=>{ el.value = el.defaultValue; });
+    $('reportDate').value = new Date().toISOString().slice(0,10);
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  $('resetFormBtn').addEventListener('click', ()=>{
+    const hasCustomerInfo = $('caseName').value.trim() !== '' || $('buyerName').value.trim() !== '';
+    if(!hasCustomerInfo || window.confirm('清空目前輸入的所有資料，重新開始試算？')){
+      resetForm();
+    }
+  });
 
   $('reportDate').value = new Date().toISOString().slice(0,10);
   render();

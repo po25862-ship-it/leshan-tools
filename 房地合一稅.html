@@ -564,7 +564,10 @@
       <h1>房地合一稅試算</h1>
       <div class="sub">House &amp; Land Transaction Income Tax Estimator</div>
     </div>
-    <div class="tag">房地合一2.0適用</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="tag">房地合一2.0適用</div>
+      <button type="button" id="resetFormBtn" style="font-size:.78rem; border:1px solid #8a3b2b; color:#8a3b2b; background:#fff; padding:5px 12px; border-radius:999px; cursor:pointer; font-weight:600; white-space:nowrap;">🔄 清空重填</button>
+    </div>
   </header>
 
   <!-- 1. 基本交易資訊 -->
@@ -1311,6 +1314,49 @@
     $('footerEditLink').style.display = 'inline-block';
     calculate(); // 同步更新列印摘要中的經紀人資訊
   });
+
+  // ---- 清空重填：只清「本次交易試算」的輸入，不動經紀人資訊設定 ----
+  function resetForm(){
+    // 一般數字／日期欄位
+    document.querySelectorAll('input[type=number], input[type=date]').forEach(el=>{ el.value = ''; });
+
+    // 費用列舉／按%計列：切回預設「逐項列舉」
+    const itemizedPill = document.querySelector('#feeModeRow .radio-pill[data-mode="itemized"]');
+    if(itemizedPill) itemizedPill.click();
+
+    // 買進／賣出仲介費：切回預設「輸入金額」模式
+    document.querySelectorAll('.pct-toggle .pct-mode-btn[data-mode="amount"]').forEach(btn=>btn.click());
+
+    // 身分別：切回預設「個人」
+    const individualPill = document.querySelector('#entityRow .radio-pill[data-entity="individual"]');
+    if(individualPill) individualPill.click();
+
+    // 目標獲利型態：切回預設「總利潤（稅前）」
+    const grossPill = document.querySelector('#targetTypeRow .radio-pill[data-target="gross"]') || document.querySelector('#targetTypeRow .radio-pill');
+    if(grossPill) grossPill.click();
+
+    // 自住優惠勾選項目
+    document.querySelectorAll('#selfUseChecklist .check-item').forEach(item=>{
+      const cb = item.querySelector('input');
+      cb.checked = false;
+      item.classList.remove('checked');
+    });
+
+    // 非自願性因素
+    if($('involuntaryToggle')){ $('involuntaryToggle').checked = false; }
+
+    calculate();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  const resetBtnEl = $('resetFormBtn');
+  if(resetBtnEl){
+    resetBtnEl.addEventListener('click', ()=>{
+      const hasInput = Array.from(document.querySelectorAll('input[type=number], input[type=date]')).some(el => el.value !== '');
+      if(!hasInput || window.confirm('清空目前輸入的所有交易資料，重新開始試算？')){
+        resetForm();
+      }
+    });
+  }
 
   renderFooterDisplay();
   calculate();
