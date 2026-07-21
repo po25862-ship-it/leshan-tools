@@ -828,16 +828,16 @@ let currentStaffEmpId = null;
 let saveTimer = null;
 
 const DEFAULT_TAGS = [
-  { id:'t1', text:'店內教育訓練', type:'evt' },
-  { id:'t2', text:'家庭日', type:'evt' },
-  { id:'t3', text:'成長大會', type:'evt' },
-  { id:'t4', text:'休假日', type:'evt' },
-  { id:'t5', text:'開發信', type:'evt' },
-  { id:'t6', text:'區月會', type:'evt' },
-  { id:'t7', text:'南崁區教育訓練', type:'evt' },
-  { id:'t8', text:'銷售日', type:'evt' },
-  { id:'t9', text:'集體看屋', type:'loc' },
-  { id:'t10', text:'流通會議', type:'loc' },
+  { id:'t1', text:'店內教育訓練', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t2', text:'家庭日', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t3', text:'成長大會', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t4', text:'休假日', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t5', text:'開發信', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t6', text:'區月會', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t7', text:'南崁區教育訓練', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t8', text:'銷售日', type:'evt', bgColor:'#eef0fb', textColor:'#3a3f8a' },
+  { id:'t9', text:'集體看屋', type:'loc', bgColor:'#e6f6fb', textColor:'#146c86' },
+  { id:'t10', text:'流通會議', type:'loc', bgColor:'#e6f6fb', textColor:'#146c86' },
 ];
 
 function emptyMonthData(){
@@ -994,27 +994,85 @@ document.getElementById('addEmpBtn').addEventListener('click', ()=>{
 });
 
 ///////////////////// 標籤調色盤 /////////////////////
+function findTagStyle(text, kind){
+  const t = tags.find(tg => tg.text === text && tg.type === kind);
+  if(t && t.bgColor && t.textColor) return `background:${t.bgColor};color:${t.textColor};border-color:${t.bgColor};`;
+  return kind === 'loc' ? 'background:#e6f6fb;color:#146c86;border-color:#bfe6f2;' : 'background:#eef0fb;color:#3a3f8a;border-color:#cfd3f2;';
+}
+
 function renderTagPalette(){
   const box = document.getElementById('tagPalette');
   box.innerHTML = '';
   tags.forEach(t=>{
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:2px;';
+
     const chip = document.createElement('div');
-    chip.className = 'tagChip ' + (t.type === 'loc' ? 'loc' : 'evt');
+    chip.className = 'tagChip';
+    chip.style.cssText = `background:${t.bgColor};color:${t.textColor};border-color:${t.bgColor};`;
     chip.draggable = true;
     chip.textContent = t.text;
     chip.dataset.tagId = t.id;
+    chip.title = '拖曳到下方月曆對應格子';
     chip.addEventListener('dragstart', (e)=>{
       e.dataTransfer.setData('text/plain', JSON.stringify({ text: t.text, type: t.type }));
     });
-    box.appendChild(chip);
+
+    const editBtn = document.createElement('span');
+    editBtn.className = 'tagColorBtn';
+    editBtn.textContent = '🎨';
+    editBtn.style.cssText = 'cursor:pointer;font-size:.8rem;';
+    editBtn.title = '調整這個標籤的顏色';
+    editBtn.addEventListener('click', ()=> openTagColorPopover(editBtn, t));
+
+    const delBtn = document.createElement('span');
+    delBtn.textContent = '✕';
+    delBtn.style.cssText = 'cursor:pointer;font-size:.72rem;color:#a02020;';
+    delBtn.title = '刪除這個標籤';
+    delBtn.addEventListener('click', ()=>{
+      if(!confirm(`確定要刪除標籤「${t.text}」嗎？（月曆上已經貼的不會被移除，只是之後不能再從這裡拖新的）`)) return;
+      tags = tags.filter(x=>x.id !== t.id);
+      Store.saveTags(tags);
+      renderTagPalette();
+    });
+
+    wrap.appendChild(chip);
+    wrap.appendChild(editBtn);
+    wrap.appendChild(delBtn);
+    box.appendChild(wrap);
   });
 }
+
+function openTagColorPopover(anchorEl, tag){
+  const rows = `
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+      背景色 <input type="color" id="tagBgColorInput" value="${tag.bgColor}">
+    </label>
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      文字色 <input type="color" id="tagTextColorInput" value="${tag.textColor}">
+    </label>
+  `;
+  const pop = openPopover(anchorEl, `「${tag.text}」顏色設定`, rows);
+  const bgInput = pop.querySelector('#tagBgColorInput');
+  const textInput = pop.querySelector('#tagTextColorInput');
+  const applyChange = ()=>{
+    tag.bgColor = bgInput.value;
+    tag.textColor = textInput.value;
+    Store.saveTags(tags);
+    renderTagPalette();
+    renderCalendar();
+  };
+  bgInput.addEventListener('input', applyChange);
+  textInput.addEventListener('input', applyChange);
+}
+
 document.getElementById('addTagBtn').addEventListener('click', ()=>{
   const input = document.getElementById('newTagInput');
   const text = input.value.trim();
   if(!text) return;
   const type = document.getElementById('newTagType').value;
-  tags.push({ id: uid('tag'), text, type });
+  const defaults = type === 'loc' ? { bgColor:'#e6f6fb', textColor:'#146c86' } : { bgColor:'#eef0fb', textColor:'#3a3f8a' };
+  tags.push({ id: uid('tag'), text, type, ...defaults });
   Store.saveTags(tags);
   input.value = '';
   renderTagPalette();
@@ -1037,7 +1095,7 @@ function openPopover(anchorEl, title, rowsHtml){
   return pop;
 }
 document.addEventListener('click', (e)=>{
-  if(e.target.closest('.popover') || e.target.closest('.empBadge') || e.target.closest('.dutyBadge')) return;
+  if(e.target.closest('.popover') || e.target.closest('.empBadge') || e.target.closest('.dutyBadge') || e.target.closest('.tagColorBtn')) return;
   if(e.target.closest('td[data-kind="special"], td[data-kind="honor"], td[data-kind="leave"]')) return;
   closeAnyPopover();
 });
@@ -1073,8 +1131,8 @@ function renderCalendar(){
 
   for(let d=1; d<=n; d++){
     const day = ensureDay(d);
-    const evtTags = (day.evt||[]).map(t=>`<span class="cellTag evt" data-day="${d}" data-idx="${day.evt.indexOf(t)}" data-kind="evt">${t}<span class="x" data-day="${d}" data-kind="evt" data-remove="${day.evt.indexOf(t)}">×</span></span>`).join('');
-    const locTags = (day.loc||[]).map(t=>`<span class="cellTag loc" data-day="${d}" data-kind="loc">${t}<span class="x" data-day="${d}" data-kind="loc" data-remove="${day.loc.indexOf(t)}">×</span></span>`).join('');
+    const evtTags = (day.evt||[]).map(t=>`<span class="cellTag" style="${findTagStyle(t,'evt')}" data-day="${d}" data-idx="${day.evt.indexOf(t)}" data-kind="evt">${t}<span class="x" data-day="${d}" data-kind="evt" data-remove="${day.evt.indexOf(t)}">×</span></span>`).join('');
+    const locTags = (day.loc||[]).map(t=>`<span class="cellTag" style="${findTagStyle(t,'loc')}" data-day="${d}" data-kind="loc">${t}<span class="x" data-day="${d}" data-kind="loc" data-remove="${day.loc.indexOf(t)}">×</span></span>`).join('');
 
     evtRow += `<td class="daycell dropzone" data-day="${d}" data-kind="evt">${evtTags}</td>`;
     locRow += `<td class="daycell dropzone" data-day="${d}" data-kind="loc">${locTags}</td>`;
