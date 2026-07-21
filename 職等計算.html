@@ -200,6 +200,7 @@
 <header>
   <h1>每月職等試算工具</h1>
   <p>台灣房屋捷運樂善直營店｜業績升等・進案警告・責任額降級 三軌並算</p>
+  <p id="rankcalcStatusPill" style="font-size:.78rem;font-weight:700;color:#a8631f;">💾 本機模式（尚未連接雲端）</p>
 </header>
 
 <div class="wrap">
@@ -271,6 +272,89 @@
 <div id="printArea"></div>
 
 <script>
+// ===== 儲存層：本機 localStorage，或（設定 Firebase 後）雲端即時同步 =====
+// 在下面 FIREBASE_CONFIG 貼上設定值，就會自動改用 Firebase 雲端同步；留空則維持本機模式。
+// 這組設定值可以跟「排班表.html」用同一個 Firebase 專案，兩個工具的資料不會互相干擾。
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAfW1Ulr6JTWeS-DWDl3NYT7GL4MyxGRU0",
+  authDomain: "leshan-tools.firebaseapp.com",
+  projectId: "leshan-tools",
+  storageBucket: "leshan-tools.firebasestorage.app",
+  messagingSenderId: "1015468015581",
+  appId: "1:1015468015581:web:15cc171fb8f56d04b34034"
+};
+
+let __rankcalcFirestore = null, __rankcalcFsFns = null;
+
+async function initRankcalcStorage(){
+  const pill = document.getElementById('rankcalcStatusPill');
+  if(window.storage){
+    // 已經在 Claude.ai 的 Artifact 環境，原生就有 window.storage，不需要覆蓋
+    if(pill){ pill.textContent = '☁️ Claude.ai 內建儲存'; pill.style.color = '#2f6b4f'; }
+    return 'native';
+  }
+  if(FIREBASE_CONFIG.apiKey){
+    try{
+      const appMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const authMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+      const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const app = appMod.initializeApp(FIREBASE_CONFIG);
+      const auth = authMod.getAuth(app);
+      await authMod.signInAnonymously(auth);
+      __rankcalcFirestore = fsMod.getFirestore(app);
+      __rankcalcFsFns = fsMod;
+      window.storage = {
+        async set(key, value){
+          const { doc, setDoc } = __rankcalcFsFns;
+          await setDoc(doc(__rankcalcFirestore, 'rankcalc_data', key), { value });
+          return { key, value };
+        },
+        async get(key){
+          const { doc, getDoc } = __rankcalcFsFns;
+          const snap = await getDoc(doc(__rankcalcFirestore, 'rankcalc_data', key));
+          if(!snap.exists()) throw new Error('尚未存過此筆資料');
+          return { key, value: snap.data().value };
+        },
+        async delete(key){
+          const { doc, deleteDoc } = __rankcalcFsFns;
+          await deleteDoc(doc(__rankcalcFirestore, 'rankcalc_data', key));
+          return { key, deleted:true };
+        },
+        async list(prefix){
+          return { keys: [] }; // 這個工具目前用不到list，先留空即可
+        }
+      };
+      if(pill){ pill.textContent = '☁️ 雲端即時同步'; pill.style.color = '#2f6b4f'; }
+      return 'cloud';
+    }catch(err){
+      console.error('Firebase 連線失敗，改用本機模式：', err);
+    }
+  }
+  // 本機模式（fallback）
+  window.storage = {
+    async set(key, value){
+      try{ localStorage.setItem('leshanRankCalc_' + key, value); return {key, value}; }
+      catch(e){ return null; }
+    },
+    async get(key){
+      const value = localStorage.getItem('leshanRankCalc_' + key);
+      if(value === null) throw new Error('尚未存過此筆資料');
+      return {key, value};
+    },
+    async delete(key){
+      try{ localStorage.removeItem('leshanRankCalc_' + key); return {key, deleted:true}; }
+      catch(e){ return null; }
+    },
+    async list(prefix){
+      const p = 'leshanRankCalc_' + (prefix || '');
+      const keys = Object.keys(localStorage).filter(k => k.startsWith(p)).map(k => k.slice('leshanRankCalc_'.length));
+      return {keys};
+    }
+  };
+  if(pill){ pill.textContent = '💾 本機模式（尚未連接雲端）'; pill.style.color = '#a8631f'; }
+  return 'local';
+}
+
 const TITLES = {15:'副總經理',14:'協理',13:'經理',12:'副理',11:'襄理',10:'主任',9:'副主任',8:'經紀人員'};
 const FLOOR_RANK = 8;
 const FLOOR_LEVEL_MIN = 3;
@@ -927,7 +1011,9 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
 });
 document.getElementById('exportHistoryBtn').addEventListener('click', exportHistoryCsv);
 
-Promise.all([load(), loadHistory()]).then(render);
+initRankcalcStorage().then(()=>{
+  Promise.all([load(), loadHistory()]).then(render);
+});
 </script>
 
 </body>
