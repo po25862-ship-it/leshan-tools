@@ -110,7 +110,28 @@
 
   @media print{
     .no-print{display:none !important;}
+    @page{ size: A4 landscape; margin: 6mm; }
+    body{ background:#fff; }
+    .wrap{ max-width:none; padding:0; }
+    header.page{ display:none; }
+    #printHeader{ display:block !important; font-size:.72rem; color:#555; margin-bottom:4px; }
+    .cal-scroll{ overflow:visible; border:none; }
+    table.cal{ width:100%; table-layout:fixed; font-size:5.6pt; }
+    table.cal th, table.cal td{ padding:1px 2px; border:0.5px solid #999; }
+    table.cal th.rowlabel, table.cal td.rowlabel{ position:static; width:32px; min-width:32px; font-size:6pt; background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table.cal th.daycol{ min-width:0; padding:1px 0; }
+    table.cal td.daycell{ min-width:0; height:auto; }
+    .cellTag{ font-size:5pt; padding:0; margin:0; border:none; background:none !important; display:block; line-height:1.15; }
+    .cellTag .x{ display:none; }
+    .empBadge{ font-size:5pt; padding:0 1px; margin:0 1px 0 0; border:none; background:none !important; }
+    .dutyBadge{ font-size:6pt; padding:0; }
+    input.timeInput{ font-size:5pt; pointer-events:none; }
+    #printLegend{ display:flex !important; flex-wrap:wrap; gap:6px; margin-top:6px; font-size:6.5pt; }
+    #printLegend .legendItem{ display:flex; align-items:center; gap:3px; }
+    #printLegend .dot{ width:7px; height:7px; border-radius:2px; display:inline-block; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    #conflictBox{ display:none !important; }
   }
+  #printHeader, #printLegend{ display:none; }
 </style>
 </head>
 <body>
@@ -142,7 +163,7 @@
     <button class="btn" id="nextMonthBtn">下個月 →</button>
     <span style="flex:1;"></span>
     <button class="btn adminOnly" id="autoScheduleBtn">🤖 自動排值班</button>
-    <button class="btn" id="printBtn">🖨️ 列印</button>
+    <button class="btn" id="printBtn">🖨️ 列印／輸出PDF（單頁）</button>
     <button class="btn" id="logoutBtn" style="border-color:var(--muted);color:var(--muted);">登出</button>
   </div>
 
@@ -165,9 +186,13 @@
     </div>
   </section>
 
+  <div id="printHeader"></div>
+
   <div class="cal-scroll">
     <table class="cal" id="calTable"></table>
   </div>
+
+  <div id="printLegend"></div>
 
   <div id="conflictBox"></div>
 </div>
@@ -656,6 +681,16 @@ function renderCalendar(){
   wireCalendarEvents(sundays);
   applyRoleUI();
   renderEmployeeList();
+  renderPrintExtras();
+}
+
+function renderPrintExtras(){
+  const ph = document.getElementById('printHeader');
+  const pl = document.getElementById('printLegend');
+  if(!ph || !pl) return;
+  const now = new Date();
+  ph.innerHTML = `台灣房屋 捷運樂善直營店　${curYear}年${curMonth}月　值班／休假排班表　（製表日期：${now.getFullYear()}/${pad2(now.getMonth()+1)}/${pad2(now.getDate())}）`;
+  pl.innerHTML = employees.map(e=>`<span class="legendItem"><span class="dot" style="background:${empColor(e.id,employees)};"></span>${empAbbr(e.id,employees)}＝${e.name}</span>`).join('');
 }
 
 function wireCalendarEvents(sundays){
