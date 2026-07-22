@@ -358,5 +358,16 @@
   render();
 })();
 </script>
+<script>
+// 手機輸入資料時，讓目前輸入中的欄位自動往上捲，避免被虛擬鍵盤擋住看不到
+document.addEventListener('focusin', function(e){
+  var t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')){
+    setTimeout(function(){
+      try{ t.scrollIntoView({block:'center', behavior:'smooth'}); }catch(err){}
+    }, 300);
+  }
+});
+</script>
 </body>
 </html>
