@@ -1504,13 +1504,36 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
 });
 </script>
 <script>
-// 手機輸入資料時，讓目前輸入中的欄位自動往上捲，避免被虛擬鍵盤擋住看不到
+// 手機輸入資料時，讓目前輸入中的欄位自動往上捲，避免被虛擬鍵盤擋住看不到；
+// 同時通知外層頁面(如果是被 index.html 用 iframe 包住)鍵盤目前是否開啟，
+// 讓外層可以暫時收合店名列/分頁列，騰出空間。
+var __kbHideTimer = null;
+function __notifyParentKb(active){
+  try{
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({source:'leshan-tools', kbActive: active}, '*');
+    }
+  }catch(err){}
+}
 document.addEventListener('focusin', function(e){
   var t = e.target;
   if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')){
+    clearTimeout(__kbHideTimer);
+    document.body.classList.add('kb-active');
+    __notifyParentKb(true);
     setTimeout(function(){
       try{ t.scrollIntoView({block:'center', behavior:'smooth'}); }catch(err){}
     }, 300);
+  }
+});
+document.addEventListener('focusout', function(e){
+  var t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')){
+    clearTimeout(__kbHideTimer);
+    __kbHideTimer = setTimeout(function(){
+      document.body.classList.remove('kb-active');
+      __notifyParentKb(false);
+    }, 250);
   }
 });
 </script>

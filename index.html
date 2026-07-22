@@ -43,6 +43,12 @@
   nav.tabs button:hover{border-color:var(--accent);}
   nav.tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
+  /* 手機輸入資料、鍵盤彈出時：把外層店名列跟分頁列收起來，讓內層工具有更多空間可以往上捲，避免輸入框被鍵盤擋住 */
+  body.kb-active header.top{ display:none; }
+  body.kb-active nav.tabs{ padding:4px 10px; }
+  body.kb-active nav.tabs button{ display:none; }
+  body.kb-active nav.tabs button.active{ display:inline-block; padding:5px 12px; font-size:.78rem; }
+
   main{flex:1;position:relative;background:var(--paper);}
   .frame-wrap{
     position:absolute;inset:0;display:none;
@@ -144,6 +150,13 @@
   }
   buttons.forEach(b => b.addEventListener('click', ()=> activate(b.dataset.tab)));
   document.querySelectorAll('.home .card').forEach(c => c.addEventListener('click', ()=> activate(c.dataset.tab)));
+
+  // 監聽內層工具頁面傳來的「鍵盤開啟中」訊息，暫時收合外層店名列/分頁列，
+  // 讓內層工具有更多可視空間，輸入框才不會被手機虛擬鍵盤擋住。
+  window.addEventListener('message', (e)=>{
+    if(!e.data || e.data.source !== 'leshan-tools') return;
+    document.body.classList.toggle('kb-active', !!e.data.kbActive);
+  });
 })();
 </script>
 </body>
