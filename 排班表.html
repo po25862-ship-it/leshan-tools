@@ -115,14 +115,15 @@
     header.page{ display:none; }
     #printHeader{ display:block !important; font-size:.72rem; color:#555; margin-bottom:4px; }
     .cal-scroll{ overflow:visible; border:none; }
-    table.cal{ width:100%; table-layout:fixed; font-size:5.6pt; }
+    table.cal{ width:100%; table-layout:fixed; font-size:5.6pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table.cal td, table.cal th{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     table.cal th, table.cal td{ padding:1px 2px; border:0.5px solid #999; }
-    table.cal th.rowlabel, table.cal td.rowlabel{ position:static; width:32px; min-width:32px; font-size:6pt; background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table.cal th.rowlabel, table.cal td.rowlabel{ position:static; width:20px; min-width:20px; font-size:6.5pt; background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; writing-mode:vertical-rl; text-orientation:upright; letter-spacing:1px; padding:4px 1px !important; }
     table.cal th.daycol{ min-width:0; padding:1px 0; }
     table.cal td.daycell{ min-width:0; height:auto; }
-    .cellTag{ font-size:5pt; padding:0; margin:0; border:none; background:none !important; display:block; line-height:1.15; }
+    .cellTag{ font-size:5pt; padding:1px 2px; margin:0 0 1px; border-radius:2px; display:block; line-height:1.2; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .cellTag .x{ display:none; }
-    .empBadge{ font-size:5pt; padding:0 1px; margin:0 1px 0 0; border:none; background:none !important; }
+    .empBadge{ font-size:5pt; padding:0 2px; margin:0 1px 1px 0; border:none; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .dutyBadge{ font-size:6pt; padding:0; }
     input.timeInput{ font-size:5pt; pointer-events:none; }
     #printLegend{ display:flex !important; flex-wrap:wrap; gap:6px; margin-top:6px; font-size:6.5pt; }
@@ -138,14 +139,15 @@
     body.print-mode header.page{ display:none; }
     body.print-mode #printHeader{ display:block !important; font-size:.72rem; color:#555; margin-bottom:4px; }
     body.print-mode .cal-scroll{ overflow:visible; border:none; }
-    body.print-mode table.cal{ width:100%; table-layout:fixed; font-size:5.6pt; }
+    body.print-mode table.cal{ width:100%; table-layout:fixed; font-size:5.6pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body.print-mode table.cal td, body.print-mode table.cal th{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     body.print-mode table.cal th, body.print-mode table.cal td{ padding:1px 2px; border:0.5px solid #999; }
-    body.print-mode table.cal th.rowlabel, body.print-mode table.cal td.rowlabel{ position:static; width:32px; min-width:32px; font-size:6pt; background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body.print-mode table.cal th.rowlabel, body.print-mode table.cal td.rowlabel{ position:static; width:20px; min-width:20px; font-size:6.5pt; background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; writing-mode:vertical-rl; text-orientation:upright; letter-spacing:1px; padding:4px 1px !important; }
     body.print-mode table.cal th.daycol{ min-width:0; padding:1px 0; }
     body.print-mode table.cal td.daycell{ min-width:0; height:auto; }
-    body.print-mode .cellTag{ font-size:5pt; padding:0; margin:0; border:none; background:none !important; display:block; line-height:1.15; }
+    body.print-mode .cellTag{ font-size:5pt; padding:1px 2px; margin:0 0 1px; border-radius:2px; display:block; line-height:1.2; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     body.print-mode .cellTag .x{ display:none; }
-    body.print-mode .empBadge{ font-size:5pt; padding:0 1px; margin:0 1px 0 0; border:none; background:none !important; }
+    body.print-mode .empBadge{ font-size:5pt; padding:0 2px; margin:0 1px 1px 0; border:none; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     body.print-mode .dutyBadge{ font-size:6pt; padding:0; }
     body.print-mode input.timeInput{ font-size:5pt; pointer-events:none; }
     body.print-mode #printLegend{ display:flex !important; flex-wrap:wrap; gap:6px; margin-top:6px; font-size:6.5pt; }
@@ -625,6 +627,11 @@ const DEFAULT_ADMIN_PW = '3288283';
 const DEFAULT_STAFF_PW = 'leshan888';
 
 const TAG_COLORS = ['#8a3b2b','#2f6b4f','#146c86','#8a6d1f','#5a3b8a','#a8631f','#3a3f8a'];
+const EMP_FILL_COLORS = ['#f3d9d3','#cfe8da','#cfe9f2','#f2e6c2','#e2d7f0','#f5ddc2','#d6d8f2'];
+function empFillColor(empId, employees){
+  const idx = employees.findIndex(e=>e.id===empId);
+  return EMP_FILL_COLORS[idx % EMP_FILL_COLORS.length] || '#eee';
+}
 
 function pad2(n){ return String(n).padStart(2,'0'); }
 function ymKey(y,m){ return `${y}-${pad2(m)}`; }
@@ -1145,11 +1152,20 @@ function renderCalendar(){
     honorRow += `<td class="daycell" data-day="${d}" data-kind="honor">${honorEmps.map(e=>`<span class="empBadge" style="border-color:${empColor(e.id,employees)};color:${empColor(e.id,employees)};" data-day="${d}" data-kind="honor">🏅${empAbbr(e.id,employees)}</span>`).join('')}</td>`;
 
     const leaveEmps = employees.filter(e=> (monthData.employeeData[e.id]?.leave||[]).includes(d));
-    leaveRow += `<td class="daycell" data-day="${d}" data-kind="leave">${leaveEmps.map(e=>`<span class="empBadge" style="border-color:${empColor(e.id,employees)};color:${empColor(e.id,employees)};" data-day="${d}" data-kind="leave">${empAbbr(e.id,employees)}</span>`).join('')}</td>`;
+    if(leaveEmps.length === 1){
+      const e = leaveEmps[0];
+      leaveRow += `<td class="daycell" data-day="${d}" data-kind="leave" style="background:${empFillColor(e.id,employees)};text-align:center;font-weight:700;color:#2b2622;">${e.name}</td>`;
+    } else {
+      leaveRow += `<td class="daycell" data-day="${d}" data-kind="leave">${leaveEmps.map(e=>`<span class="empBadge" style="border-color:${empColor(e.id,employees)};color:${empColor(e.id,employees)};" data-day="${d}" data-kind="leave">${empAbbr(e.id,employees)}</span>`).join('')}</td>`;
+    }
 
     const dutyEmpId = monthData.duty[d];
-    const dutyText = dutyEmpId ? empAbbr(dutyEmpId, employees) : '－';
-    dutyRow += `<td class="daycell"><span class="dutyBadge ${dutyEmpId?'':'empty'}" data-day="${d}" style="color:${dutyEmpId?empColor(dutyEmpId,employees):'#ccc'}">${dutyText}</span></td>`;
+    const dutyText = dutyEmpId ? empName(dutyEmpId, employees) : '－';
+    if(dutyEmpId){
+      dutyRow += `<td class="daycell" data-day="${d}" data-kind="dutycell" style="background:${empFillColor(dutyEmpId,employees)};"><span class="dutyBadge" data-day="${d}" style="color:#2b2622;">${dutyText}</span></td>`;
+    } else {
+      dutyRow += `<td class="daycell" data-day="${d}" data-kind="dutycell"><span class="dutyBadge empty" data-day="${d}" style="color:#ccc;">${dutyText}</span></td>`;
+    }
   }
   evtRow += '</tr>'; locRow += '</tr>'; timeRow += '</tr>';
   specialRow += '</tr>'; honorRow += '</tr>'; leaveRow += '</tr>'; dutyRow += '</tr>';
