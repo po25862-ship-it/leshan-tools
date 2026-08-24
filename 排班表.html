@@ -1036,6 +1036,7 @@ function renderEmployeeList(){
       <input type="number" value="${e.leaveTarget}" min="0" max="31" data-field="leaveTarget" data-id="${e.id}">
       <span style="color:var(--muted);">本月最後上班日</span>
       <input type="number" value="${ed.lastWorkDay||''}" min="1" max="${maxDay}" data-field="lastWorkDay" data-id="${e.id}" placeholder="月底">
+      <button type="button" class="btn small" data-action="applyLastWorkDay" data-id="${e.id}">套用</button>
       <br>
       <span style="color:var(--muted);">本月休假日（用 . 或逗號分隔）</span>
       <input type="text" style="width:170px;" value="${(ed.leave||[]).join('.')}" data-field="leaveDays" data-id="${e.id}" placeholder="例：3.5.15">
@@ -1067,6 +1068,20 @@ function renderEmployeeList(){
   box.querySelectorAll('input[data-field="lastWorkDay"]').forEach(inp=>{
     inp.addEventListener('change', async ()=>{
       await setEmployeeLastWorkDay(inp.dataset.id, inp.value, maxDay);
+      renderEmployeeList();
+      renderCalendar();
+    });
+  });
+  box.querySelectorAll('button[data-action="applyLastWorkDay"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const inp = box.querySelector(`input[data-field="lastWorkDay"][data-id="${btn.dataset.id}"]`);
+      if(!inp) return;
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = '儲存中…';
+      await setEmployeeLastWorkDay(btn.dataset.id, inp.value, maxDay);
+      btn.textContent = originalText;
+      btn.disabled = false;
       renderEmployeeList();
       renderCalendar();
     });
