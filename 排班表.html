@@ -587,24 +587,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   #authGate h2{font-size:1.25rem;margin-bottom:9px}#authGate p{line-height:1.7;margin-bottom:18px}
   #authGate input{border-radius:10px;padding:11px 12px;border-color:#ded2c6;margin-bottom:10px}
   #authGate button{border-radius:10px;padding:11px;margin-top:7px}
-  #pdfSheet{position:fixed;left:-20000px;top:0;width:1120px;background:#fff;color:#282220;padding:28px 30px 22px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+  #pdfSheet{position:fixed;left:-20000px;top:0;width:1120px;height:780px;background:#fff;color:#282220;padding:24px 28px 18px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex;flex-direction:column}
   #pdfSheet .pdf-head{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:3px solid #862f27;padding-bottom:13px;margin-bottom:12px}
   #pdfSheet .pdf-kicker{font-size:11px;letter-spacing:.16em;color:#a07436;font-weight:800;margin-bottom:4px}
   #pdfSheet h2{margin:0;font-size:25px;letter-spacing:.03em;color:#312723}
   #pdfSheet .pdf-meta{text-align:right;font-size:11px;color:#756c64;line-height:1.65}
   #pdfSheet .pdf-period{font-size:17px;font-weight:800;color:#862f27}
-  #pdfSheet .pdf-grid{display:grid;gap:11px}
-  #pdfSheet .pdf-range{border:1px solid #d9cec4;border-radius:10px;overflow:hidden}
+  #pdfSheet .pdf-grid{display:grid;gap:11px;flex:1;min-height:0}
+  #pdfSheet .pdf-range{border:1px solid #d9cec4;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
   #pdfSheet .pdf-range-title{background:#f4eee8;color:#6e2922;padding:5px 8px;font-size:10px;font-weight:800;letter-spacing:.08em}
-  #pdfSheet table{border-collapse:collapse;width:100%;table-layout:fixed}
-  #pdfSheet th,#pdfSheet td{border:1px solid #e3dad2;padding:2px 1px;text-align:center;vertical-align:middle;font-size:7px;height:28px;overflow:hidden;word-break:break-all}
-  #pdfSheet th{background:#faf8f5;font-size:7px;font-weight:800;height:23px;padding:2px 0}
-  #pdfSheet th small{display:block;font-size:6px;line-height:1.1}
+  #pdfSheet table{border-collapse:collapse;width:100%;table-layout:fixed;flex:1;height:100%}
+  #pdfSheet th,#pdfSheet td{border:1px solid #e3dad2;padding:3px 1px;text-align:center;vertical-align:middle;font-size:8px;overflow:hidden;word-break:break-all}
+  #pdfSheet th{background:#faf8f5;font-size:8px;font-weight:800;padding:3px 0}
+  #pdfSheet th small{display:block;font-size:7px;line-height:1.15}
   #pdfSheet th.sun{color:#b33b30;background:#fff2ef}#pdfSheet th.sat{color:#2d6792;background:#f1f7fb}
-  #pdfSheet .pdf-label{width:50px;background:#7c2a23;color:#fff;font-weight:800;font-size:8px;letter-spacing:0}
-  #pdfSheet .pdf-tag{display:block;border-radius:2px;padding:1px;margin:1px 0;line-height:1.15;font-size:6px;font-weight:700}
-  #pdfSheet .pdf-person{display:inline-block;min-width:12px;border-radius:3px;padding:1px 2px;margin:1px;text-align:center;font-size:7px;font-weight:700}
-  #pdfSheet .pdf-duty{font-size:8px;font-weight:900}
+  #pdfSheet .pdf-label{width:50px;background:#7c2a23;color:#fff;font-weight:800;font-size:9px;letter-spacing:0}
+  #pdfSheet .pdf-tag{display:block;border-radius:2px;padding:2px 1px;margin:1px 0;line-height:1.2;font-size:7px;font-weight:700}
+  #pdfSheet .pdf-person{display:inline-block;min-width:13px;border-radius:3px;padding:2px;margin:1px;text-align:center;font-size:8px;font-weight:700}
+  #pdfSheet .pdf-duty{font-size:9px;font-weight:900}
   #pdfSheet .pdf-legend{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:11px;padding:9px 11px;border-radius:8px;background:#faf7f3;font-size:10px;color:#5d534c}
   #pdfSheet .pdf-legend-item{display:flex;align-items:center;gap:5px}.pdf-legend-dot{width:9px;height:9px;border-radius:3px}
   #pdfSheet .pdf-foot{display:flex;justify-content:space-between;margin-top:9px;font-size:8px;color:#8a7e75}
