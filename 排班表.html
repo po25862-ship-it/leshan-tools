@@ -596,15 +596,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   #pdfSheet .pdf-grid{display:grid;gap:11px;flex:1;min-height:0}
   #pdfSheet .pdf-range{border:1px solid #d9cec4;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
   #pdfSheet .pdf-range-title{background:#f4eee8;color:#6e2922;padding:5px 8px;font-size:10px;font-weight:800;letter-spacing:.08em}
-  #pdfSheet table{border-collapse:collapse;width:100%;table-layout:fixed;flex:1;height:100%}
-  #pdfSheet th,#pdfSheet td{border:1px solid #e3dad2;padding:3px 1px;text-align:center;vertical-align:middle;font-size:8px;overflow:hidden;word-break:break-all}
-  #pdfSheet th{background:#faf8f5;font-size:8px;font-weight:800;padding:3px 0}
+  #pdfSheet table{border-collapse:collapse;width:100%;table-layout:fixed;flex:none;height:calc(100% - 27px);min-height:0}
+  #pdfSheet th,#pdfSheet td{border:1px solid #d7cec6;padding:3px 1px;text-align:center;vertical-align:middle;font-size:9px;overflow:hidden;word-break:break-all}
+  #pdfSheet th{background:#faf8f5;font-size:9px;font-weight:800;padding:3px 0}
   #pdfSheet th small{display:block;font-size:7px;line-height:1.15}
   #pdfSheet th.sun{color:#b33b30;background:#fff2ef}#pdfSheet th.sat{color:#2d6792;background:#f1f7fb}
-  #pdfSheet .pdf-label{width:50px;background:#7c2a23;color:#fff;font-weight:800;font-size:9px;letter-spacing:0}
-  #pdfSheet .pdf-tag{display:block;border-radius:2px;padding:2px 1px;margin:1px 0;line-height:1.2;font-size:7px;font-weight:700}
-  #pdfSheet .pdf-person{display:inline-block;min-width:13px;border-radius:3px;padding:2px;margin:1px;text-align:center;font-size:8px;font-weight:700}
+  #pdfSheet .pdf-label{width:52px;background:#7c2a23;color:#fff;font-weight:800;font-size:10px;letter-spacing:0}
+  #pdfSheet .pdf-vertical-group{height:100%;display:flex;align-items:center;justify-content:center;gap:2px}
+  #pdfSheet .pdf-tag.pdf-vertical{display:inline-block;border-radius:3px;padding:4px 3px;margin:0;line-height:1.12;font-size:9px;font-weight:800;white-space:nowrap}
+  #pdfSheet .pdf-vertical-text{display:inline-block;line-height:1.12;font-size:9px;font-weight:700;white-space:nowrap}
+  #pdfSheet .pdf-person-group{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  #pdfSheet .pdf-person{display:block;min-width:15px;border-radius:3px;padding:2px 3px;margin:0;text-align:center;font-size:9px;font-weight:800}
   #pdfSheet .pdf-duty{font-size:9px;font-weight:900}
+  #pdfSheet .pdf-row-event{height:130px}
+  #pdfSheet .pdf-row-location{height:80px}
+  #pdfSheet .pdf-row-time{height:72px}
+  #pdfSheet .pdf-row-special,#pdfSheet .pdf-row-honor{height:36px}
+  #pdfSheet .pdf-row-leave{height:78px}
+  #pdfSheet .pdf-row-duty{height:34px}
   #pdfSheet .pdf-legend{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:11px;padding:9px 11px;border-radius:8px;background:#faf7f3;font-size:10px;color:#5d534c}
   #pdfSheet .pdf-legend-item{display:flex;align-items:center;gap:5px}.pdf-legend-dot{width:9px;height:9px;border-radius:3px}
   #pdfSheet .pdf-foot{display:flex;justify-content:space-between;margin-top:9px;font-size:8px;color:#8a7e75}
@@ -1576,11 +1585,21 @@ document.getElementById('toggleSettingsBtn').addEventListener('click', (e)=>{
 function escapePdfHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
 }
+function verticalPdfText(value){
+  return Array.from(String(value ?? '')).map(ch=>escapePdfHtml(ch)).join('<br>');
+}
+
+function pdfVerticalTags(kind, day){
+  const item = ensureDay(day);
+  const values = item[kind] || [];
+  if(!values.length) return '<span style="color:#c2b8b0">—</span>';
+  return `<div class="pdf-vertical-group">${values.map(t=>`<span class="pdf-tag pdf-vertical" style="${findTagStyle(t,kind)}">${verticalPdfText(t)}</span>`).join('')}</div>`;
+}
 
 function pdfEmployeeBadges(kind, day){
   const list = employees.filter(e=> (monthData.employeeData[e.id]?.[kind] || []).includes(day));
   if(!list.length) return '<span style="color:#c2b8b0">—</span>';
-  return list.map(e=>`<span class="pdf-person" style="background:${empFillColor(e.id,employees)};color:#2b2622">${escapePdfHtml(empAbbr(e.id,employees))}</span>`).join('');
+  return `<div class="pdf-person-group">${list.map(e=>`<span class="pdf-person" style="background:${empFillColor(e.id,employees)};color:#2b2622">${escapePdfHtml(empAbbr(e.id,employees))}</span>`).join('')}</div>`;
 }
 
 function renderPdfRange(start, end){
@@ -1589,15 +1608,15 @@ function renderPdfRange(start, end){
   html += days.map(d=>{const wd=weekdayOf(curYear,curMonth,d);return `<th class="${wd===0?'sun':(wd===6?'sat':'')}">${d}<small>（${weekdayLabel(wd)}）</small></th>`}).join('');
   html += '</tr></thead><tbody>';
   const rows=[
-    ['行事內容',d=>{const item=ensureDay(d);return (item.evt||[]).map(t=>`<span class="pdf-tag" style="${findTagStyle(t,'evt')}">${escapePdfHtml(t)}</span>`).join('')||'—';}],
-    ['地點',d=>{const item=ensureDay(d);return (item.loc||[]).map(t=>`<span class="pdf-tag" style="${findTagStyle(t,'loc')}">${escapePdfHtml(t)}</span>`).join('')||'—';}],
-    ['時間',d=>escapePdfHtml(ensureDay(d).time||'—')],
-    ['特休',d=>pdfEmployeeBadges('specialLeave',d)],
-    ['榮譽',d=>pdfEmployeeBadges('honor',d)],
-    ['休假',d=>pdfEmployeeBadges('leave',d)],
-    ['值班',d=>{const id=monthData.duty[d];return id?`<span class="pdf-duty" style="display:block;background:${empFillColor(id,employees)};padding:3px 1px;border-radius:3px">${escapePdfHtml(empAbbr(id,employees))}</span>`:'<span style="color:#c2b8b0">—</span>';}]
+    ['行事內容','pdf-row-event',d=>pdfVerticalTags('evt',d)],
+    ['地點','pdf-row-location',d=>pdfVerticalTags('loc',d)],
+    ['時間','pdf-row-time',d=>{const value=ensureDay(d).time;return value?`<span class="pdf-vertical-text">${verticalPdfText(value)}</span>`:'<span style="color:#c2b8b0">—</span>';}],
+    ['特休','pdf-row-special',d=>pdfEmployeeBadges('specialLeave',d)],
+    ['榮譽','pdf-row-honor',d=>pdfEmployeeBadges('honor',d)],
+    ['休假','pdf-row-leave',d=>pdfEmployeeBadges('leave',d)],
+    ['值班','pdf-row-duty',d=>{const id=monthData.duty[d];return id?`<span class="pdf-duty" style="display:block;background:${empFillColor(id,employees)};padding:4px 1px;border-radius:3px">${escapePdfHtml(empAbbr(id,employees))}</span>`:'<span style="color:#c2b8b0">—</span>';}]
   ];
-  rows.forEach(([label,getValue])=>{html+=`<tr><td class="pdf-label">${label}</td>${days.map(d=>`<td>${getValue(d)}</td>`).join('')}</tr>`;});
+  rows.forEach(([label,rowClass,getValue])=>{html+=`<tr class="${rowClass}"><td class="pdf-label">${label}</td>${days.map(d=>`<td>${getValue(d)}</td>`).join('')}</tr>`;});
   return html+'</tbody></table></section>';
 }
 
