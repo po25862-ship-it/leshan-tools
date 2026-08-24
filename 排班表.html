@@ -996,7 +996,7 @@ function setEmployeeDutyDays(empId, dayList){
   if(msg) alert(msg.trim());
 }
 
-function setEmployeeLastWorkDay(empId, value, maxDay){
+async function setEmployeeLastWorkDay(empId, value, maxDay){
   const ed = ensureEmpData(empId);
   const parsed = parseInt(value, 10);
   const lastDay = Number.isFinite(parsed) && parsed >= 1 && parsed <= maxDay ? parsed : null;
@@ -1011,7 +1011,8 @@ function setEmployeeLastWorkDay(empId, value, maxDay){
       }
     });
   }
-  queueSave();
+  const snapshot = JSON.parse(JSON.stringify(monthData));
+  await Store.saveMonth(ymKey(curYear,curMonth), snapshot);
   if(cleared.length){
     alert(`${empName(empId, employees)} 最後上班日之後的值班（${cleared.join('、')} 日）已自動清除。`);
   }
@@ -1064,8 +1065,8 @@ function renderEmployeeList(){
     });
   });
   box.querySelectorAll('input[data-field="lastWorkDay"]').forEach(inp=>{
-    inp.addEventListener('change', ()=>{
-      setEmployeeLastWorkDay(inp.dataset.id, inp.value, maxDay);
+    inp.addEventListener('change', async ()=>{
+      await setEmployeeLastWorkDay(inp.dataset.id, inp.value, maxDay);
       renderEmployeeList();
       renderCalendar();
     });
