@@ -595,15 +595,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   #pdfSheet .pdf-period{font-size:17px;font-weight:800;color:#862f27}
   #pdfSheet .pdf-grid{display:grid;gap:11px}
   #pdfSheet .pdf-range{border:1px solid #d9cec4;border-radius:10px;overflow:hidden}
-  #pdfSheet .pdf-range-title{background:#f4eee8;color:#6e2922;padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.08em}
+  #pdfSheet .pdf-range-title{background:#f4eee8;color:#6e2922;padding:5px 8px;font-size:10px;font-weight:800;letter-spacing:.08em}
   #pdfSheet table{border-collapse:collapse;width:100%;table-layout:fixed}
-  #pdfSheet th,#pdfSheet td{border:1px solid #e3dad2;padding:3px;text-align:center;vertical-align:middle;font-size:9px;height:30px;overflow:hidden}
-  #pdfSheet th{background:#faf8f5;font-size:10px;font-weight:800;height:26px}
+  #pdfSheet th,#pdfSheet td{border:1px solid #e3dad2;padding:2px 1px;text-align:center;vertical-align:middle;font-size:7px;height:28px;overflow:hidden;word-break:break-all}
+  #pdfSheet th{background:#faf8f5;font-size:7px;font-weight:800;height:23px;padding:2px 0}
+  #pdfSheet th small{display:block;font-size:6px;line-height:1.1}
   #pdfSheet th.sun{color:#b33b30;background:#fff2ef}#pdfSheet th.sat{color:#2d6792;background:#f1f7fb}
-  #pdfSheet .pdf-label{width:62px;background:#7c2a23;color:#fff;font-weight:800;font-size:10px;letter-spacing:.04em}
-  #pdfSheet .pdf-tag{display:block;border-radius:3px;padding:2px 3px;margin:1px 0;line-height:1.15;font-weight:700}
-  #pdfSheet .pdf-person{display:inline-block;min-width:28px;border-radius:4px;padding:2px 3px;margin:1px;text-align:center;font-weight:700}
-  #pdfSheet .pdf-duty{font-size:10px;font-weight:900}
+  #pdfSheet .pdf-label{width:50px;background:#7c2a23;color:#fff;font-weight:800;font-size:8px;letter-spacing:0}
+  #pdfSheet .pdf-tag{display:block;border-radius:2px;padding:1px;margin:1px 0;line-height:1.15;font-size:6px;font-weight:700}
+  #pdfSheet .pdf-person{display:inline-block;min-width:12px;border-radius:3px;padding:1px 2px;margin:1px;text-align:center;font-size:7px;font-weight:700}
+  #pdfSheet .pdf-duty{font-size:8px;font-weight:900}
   #pdfSheet .pdf-legend{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:11px;padding:9px 11px;border-radius:8px;background:#faf7f3;font-size:10px;color:#5d534c}
   #pdfSheet .pdf-legend-item{display:flex;align-items:center;gap:5px}.pdf-legend-dot{width:9px;height:9px;border-radius:3px}
   #pdfSheet .pdf-foot{display:flex;justify-content:space-between;margin-top:9px;font-size:8px;color:#8a7e75}
@@ -1578,15 +1579,6 @@ function pdfEmployeeBadges(kind, day){
   return list.map(e=>`<span class="pdf-person" style="background:${empFillColor(e.id,employees)};color:#2b2622">${escapePdfHtml(empAbbr(e.id,employees))}</span>`).join('');
 }
 
-function pdfWorkingBadges(day){
-  const list = employees.filter(e=>{
-    const ed = monthData.employeeData[e.id] || {};
-    return !(ed.leave||[]).includes(day) && !(ed.specialLeave||[]).includes(day) && !(ed.lastWorkDay && day > ed.lastWorkDay);
-  });
-  if(!list.length) return '<span style="color:#c2b8b0">—</span>';
-  return list.map(e=>`<span class="pdf-person" style="background:${empFillColor(e.id,employees)};color:#2b2622">${escapePdfHtml(empAbbr(e.id,employees))}</span>`).join('');
-}
-
 function renderPdfRange(start, end){
   const days=[]; for(let d=start;d<=end;d++) days.push(d);
   let html=`<section class="pdf-range"><div class="pdf-range-title">${start} — ${end} 日</div><table><thead><tr><th class="pdf-label">項目</th>`;
@@ -1599,8 +1591,7 @@ function renderPdfRange(start, end){
     ['特休',d=>pdfEmployeeBadges('specialLeave',d)],
     ['榮譽',d=>pdfEmployeeBadges('honor',d)],
     ['休假',d=>pdfEmployeeBadges('leave',d)],
-    ['值班',d=>{const id=monthData.duty[d];return id?`<span class="pdf-duty" style="display:block;background:${empFillColor(id,employees)};padding:4px 2px;border-radius:4px">${escapePdfHtml(empName(id,employees))}</span>`:'<span style="color:#c2b8b0">—</span>';}],
-    ['今日上班',d=>pdfWorkingBadges(d)]
+    ['值班',d=>{const id=monthData.duty[d];return id?`<span class="pdf-duty" style="display:block;background:${empFillColor(id,employees)};padding:3px 1px;border-radius:3px">${escapePdfHtml(empAbbr(id,employees))}</span>`:'<span style="color:#c2b8b0">—</span>';}]
   ];
   rows.forEach(([label,getValue])=>{html+=`<tr><td class="pdf-label">${label}</td>${days.map(d=>`<td>${getValue(d)}</td>`).join('')}</tr>`;});
   return html+'</tbody></table></section>';
@@ -1613,7 +1604,7 @@ function renderPdfSheet(){
   const legend=employees.map(e=>`<span class="pdf-legend-item"><span class="pdf-legend-dot" style="background:${empFillColor(e.id,employees)}"></span>${escapePdfHtml(e.name)}</span>`).join('');
   sheet.innerHTML=`
     <header class="pdf-head"><div><div class="pdf-kicker">LESHAN MONTHLY ROSTER</div><h2>值班／休假排班表</h2></div><div class="pdf-meta"><div class="pdf-period">${curYear} 年 ${curMonth} 月</div>台灣房屋 捷運樂善直營店<br>製表日期 ${now.getFullYear()}.${pad2(now.getMonth()+1)}.${pad2(now.getDate())}</div></header>
-    <main class="pdf-grid">${renderPdfRange(1,Math.min(16,total))}${total>16?renderPdfRange(17,total):''}</main>
+    <main class="pdf-grid">${renderPdfRange(1,total)}</main>
     <div class="pdf-legend"><strong>人員色標</strong>${legend}</div>
     <footer class="pdf-foot"><span>內部排班作業使用｜如有異動請以線上最新版本為準</span><span>${ymKey(curYear,curMonth)}</span></footer>`;
   return sheet;
