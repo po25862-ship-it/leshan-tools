@@ -914,7 +914,12 @@ function ensureDay(day){
 }
 function ensureEmpData(empId){
   if(!monthData.employeeData[empId]) monthData.employeeData[empId] = { leave: [], specialLeave: [], honor: [] };
-  return monthData.employeeData[empId];
+  const ed = monthData.employeeData[empId];
+  if(!Array.isArray(ed.leave)) ed.leave = [];
+  if(!Array.isArray(ed.specialLeave)) ed.specialLeave = [];
+  if(!Array.isArray(ed.honor)) ed.honor = [];
+  if(!Object.prototype.hasOwnProperty.call(ed, 'lastWorkDay')) ed.lastWorkDay = null;
+  return ed;
 }
 
 function queueSave(){
@@ -970,23 +975,43 @@ function setEmployeeLeaveDays(empId, dayList){
 // 設定某員工「本月指定值班日」整批覆蓋：先清除該員工原本被指定的值班日，再依新名單填入
 // 若該天是這位員工的休假日，或已被別人佔用，會跳過並回報，不會硬蓋過去
 function setEmployeeDutyDays(empId, dayList){
-  const ed = ensureEmpData(empId);
-  const leaveSet = new Set(ed.leave || []);
+  ensureEmpData(empId);
   // 先清掉這位員工原本所有的值班天(整批覆蓋的邏輯)
   Object.keys(monthData.duty).forEach(d=>{
     if(monthData.duty[d] === empId) delete monthData.duty[Number(d)];
   });
   const skippedLeave = [], skippedTaken = [];
   dayList.forEach(d=>{
-    if(leaveSet.has(d)){ skippedLeave.push(d); return; }
+    if(isEmpUnavailable(empId, d)){ skippedLeave.push(d); return; }
     if(monthData.duty[d] && monthData.duty[d] !== empId){ skippedTaken.push(d); return; }
     monthData.duty[d] = empId;
   });
   queueSave();
   let msg = '';
-  if(skippedLeave.length) msg += `第 ${skippedLeave.join('、')} 天是休假日，不能排值班，已略過。\n`;
+  if(skippedLeave.length) msg += `第 ${skippedLeave.join('、')} 天是休假日或已超過最後上班日，不能排值班，已略過。\n`;
   if(skippedTaken.length) msg += `第 ${skippedTaken.join('、')} 天已經被別人排走了，已略過（請先去該天的值班格子確認）。\n`;
   if(msg) alert(msg.trim());
+}
+
+function setEmployeeLastWorkDay(empId, value, maxDay){
+  const ed = ensureEmpData(empId);
+  const parsed = parseInt(value, 10);
+  const lastDay = Number.isFinite(parsed) && parsed >= 1 && parsed <= maxDay ? parsed : null;
+  ed.lastWorkDay = lastDay;
+  const cleared = [];
+  if(lastDay){
+    Object.keys(monthData.duty).forEach(day=>{
+      const d = Number(day);
+      if(d > lastDay && monthData.duty[d] === empId){
+        delete monthData.duty[d];
+        cleared.push(d);
+      }
+    });
+  }
+  queueSave();
+  if(cleared.length){
+    alert(`${empName(empId, employees)} 最後上班日之後的值班（${cleared.join('、')} 日）已自動清除。`);
+  }
 }
 
 function renderEmployeeList(){
@@ -1005,6 +1030,8 @@ function renderEmployeeList(){
       <input type="number" value="${e.dutyTarget}" min="0" max="31" data-field="dutyTarget" data-id="${e.id}">
       <span style="color:var(--muted);">休假目標</span>
       <input type="number" value="${e.leaveTarget}" min="0" max="31" data-field="leaveTarget" data-id="${e.id}">
+      <span style="color:var(--muted);">本月最後上班日</span>
+      <input type="number" value="${ed.lastWorkDay||''}" min="1" max="${maxDay}" data-field="lastWorkDay" data-id="${e.id}" placeholder="月底">
       <br>
       <span style="color:var(--muted);">本月休假日（用 . 或逗號分隔）</span>
       <input type="text" style="width:170px;" value="${(ed.leave||[]).join('.')}" data-field="leaveDays" data-id="${e.id}" placeholder="例：3.5.15">
@@ -1029,6 +1056,13 @@ function renderEmployeeList(){
     inp.addEventListener('change', ()=>{
       const dayList = parseDayList(inp.value, maxDay);
       setEmployeeLeaveDays(inp.dataset.id, dayList);
+      renderEmployeeList();
+      renderCalendar();
+    });
+  });
+  box.querySelectorAll('input[data-field="lastWorkDay"]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      setEmployeeLastWorkDay(inp.dataset.id, inp.value, maxDay);
       renderEmployeeList();
       renderCalendar();
     });
@@ -1226,7 +1260,7 @@ function renderCalendar(){
 
     const workingEmps = employees.filter(e=>{
       const ed = monthData.employeeData[e.id] || {};
-      return !(ed.leave||[]).includes(d) && !(ed.specialLeave||[]).includes(d);
+      return !(ed.leave||[]).includes(d) && !(ed.specialLeave||[]).includes(d) && !(ed.lastWorkDay && d > ed.lastWorkDay);
     });
     workingRow += `<td class="daycell" data-day="${d}" data-kind="working">${workingEmps.map(e=>`<span class="empBadge workBadge" title="${e.name}" style="background:${empFillColor(e.id,employees)};border-color:${empColor(e.id,employees)};color:#2b2622;">${empAbbr(e.id,employees)}</span>`).join('')}</td>`;
   }
@@ -1354,16 +1388,16 @@ function openEmployeeTogglePopover(anchorEl, day, kind){
 function isEmpUnavailable(empId, day){
   const ed = monthData.employeeData[empId];
   if(!ed) return false;
-  return (ed.leave||[]).includes(day) || (ed.specialLeave||[]).includes(day);
+  return (ed.leave||[]).includes(day) || (ed.specialLeave||[]).includes(day) || !!(ed.lastWorkDay && day > ed.lastWorkDay);
 }
 
 function openDutyPickerPopover(anchorEl, day){
   const currentEmp = monthData.duty[day] || null;
   let rows = `<label><input type="radio" name="dutypick" value="__clear__" ${!currentEmp?'checked':''}> <span style="color:#999;">（清空／不指定）</span></label>`;
   employees.forEach(e=>{
-    const onLeave = isEmpUnavailable(e.id, day);
-    const disabled = !canSetDuty(e.id, currentEmp) || onLeave;
-    const leaveNote = onLeave ? ' <span style="color:#a02020;">（休假中，不可值班）</span>' : '';
+    const unavailable = isEmpUnavailable(e.id, day);
+    const disabled = !canSetDuty(e.id, currentEmp) || unavailable;
+    const leaveNote = unavailable ? ' <span style="color:#a02020;">（休假／特休／非在職日，不可值班）</span>' : '';
     rows += `<label style="${disabled?'opacity:.4;':''}">
       <input type="radio" name="dutypick" value="${e.id}" ${currentEmp===e.id?'checked':''} ${disabled?'disabled':''}>
       <span style="color:${empColor(e.id,employees)};font-weight:700;">${e.name}</span>${leaveNote}
@@ -1377,7 +1411,7 @@ function openDutyPickerPopover(anchorEl, day){
         delete monthData.duty[day];
       } else {
         if(!canSetDuty(r.value, currentEmp)) { renderCalendar(); return; }
-        if(isEmpUnavailable(r.value, day)) { alert('這位同仁當天是休假／特休，不能排值班。'); renderCalendar(); return; }
+        if(isEmpUnavailable(r.value, day)) { alert('這位同仁當天是休假、特休或已超過最後上班日，不能排值班。'); renderCalendar(); return; }
         monthData.duty[day] = r.value;
       }
       queueSave();
@@ -1424,6 +1458,9 @@ document.getElementById('autoScheduleBtn').addEventListener('click', async ()=>{
   employees.forEach(e=>{
     const ed = ensureEmpData(e.id);
     unavailable[e.id] = new Set([...(ed.leave||[]), ...(ed.specialLeave||[])]);
+    if(ed.lastWorkDay){
+      for(let day=ed.lastWorkDay+1; day<=n; day++) unavailable[e.id].add(day);
+    }
   });
   const locked = { ...monthData.duty }; // 目前已手動排的日期，視為鎖定，自動排班只補空的
   const empForSchedule = employees.map(e=>({ id: e.id, dutyTarget: e.dutyTarget || 0 }));
@@ -1496,7 +1533,7 @@ function pdfEmployeeBadges(kind, day){
 function pdfWorkingBadges(day){
   const list = employees.filter(e=>{
     const ed = monthData.employeeData[e.id] || {};
-    return !(ed.leave||[]).includes(day) && !(ed.specialLeave||[]).includes(day);
+    return !(ed.leave||[]).includes(day) && !(ed.specialLeave||[]).includes(day) && !(ed.lastWorkDay && day > ed.lastWorkDay);
   });
   if(!list.length) return '<span style="color:#c2b8b0">—</span>';
   return list.map(e=>`<span class="pdf-person" style="background:${empFillColor(e.id,employees)};color:#2b2622">${escapePdfHtml(empAbbr(e.id,employees))}</span>`).join('');
