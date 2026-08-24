@@ -580,6 +580,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .empBadge.leaveBadge{min-width:36px;text-align:center;padding:2px 5px;margin:2px;border-width:1px;line-height:1.35}
   .empBadge.workBadge{min-width:30px;text-align:center;padding:1px 4px;margin:1px;border-width:1px;line-height:1.3;font-size:.62rem}
   .dutyBadge{padding:8px 2px}
+  body.settings-hidden .settingsPanel{display:none}
   #authGate{background:radial-gradient(circle at 50% 20%,#993b31 0,#642019 42%,#2d201d 100%)}
   #authGate:before{content:"";position:absolute;width:380px;height:380px;border:1px solid rgba(255,255,255,.10);border-radius:50%;top:-255px;right:-100px;box-shadow:0 0 0 48px rgba(255,255,255,.025),0 0 0 96px rgba(255,255,255,.02)}
   #authGate .box{position:relative;background:#fff;border:1px solid rgba(255,255,255,.55);border-radius:20px;padding:30px 28px;max-width:380px;box-shadow:0 26px 70px rgba(30,15,11,.35)}
@@ -607,10 +608,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   #pdfSheet .pdf-legend-item{display:flex;align-items:center;gap:5px}.pdf-legend-dot{width:9px;height:9px;border-radius:3px}
   #pdfSheet .pdf-foot{display:flex;justify-content:space-between;margin-top:9px;font-size:8px;color:#8a7e75}
   @media print{body>.wrap{display:none!important}#pdfSheet{display:block!important;position:static!important;left:auto!important;top:auto!important;width:100%!important;padding:0!important}.pdf-range{break-inside:avoid}}
+  @media screen and (min-width:900px){
+    .wrap{max-width:none;padding:18px 12px 48px}
+    header.page{margin-bottom:12px}
+    .toolbar{margin-bottom:12px;padding:9px 10px}
+    .cal-scroll{overflow-x:hidden}
+    table.cal{width:100%;min-width:0;table-layout:fixed}
+    table.cal th.rowlabel,table.cal td.rowlabel{width:68px;min-width:68px;font-size:.68rem;padding:3px 1px}
+    table.cal th.daycol{width:auto;min-width:0;padding:4px 0;font-size:.64rem}
+    table.cal td.daycell{width:auto;min-width:0;height:32px;padding:1px;font-size:.6rem;overflow:hidden}
+    .cellTag{max-width:100%;padding:1px 2px;margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.56rem}
+    .cellTag .x{display:none}
+    .empBadge,.empBadge.leaveBadge,.empBadge.workBadge{min-width:16px;padding:1px 2px;margin:1px;font-size:.58rem;line-height:1.2}
+    .dutyBadge{padding:4px 0;font-size:.68rem}
+    input.timeInput{font-size:.56rem;padding:0}
+  }
   @media(max-width:680px){.wrap{padding-top:18px}.toolbar{gap:7px}.toolbar span[style*="flex:1"]{display:none}.toolbar .btn{flex:1}.cal-scroll{border-radius:11px}header.page h1{font-size:1.3rem}}
 </style>
 </head>
-<body>
+<body class="settings-hidden">
 
 <div id="authGate">
   <div class="box">
@@ -637,6 +653,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     <select id="monthSelect"></select>
     <button class="btn" id="prevMonthBtn">← 上個月</button>
     <button class="btn" id="nextMonthBtn">下個月 →</button>
+    <button class="btn adminOnly" id="toggleSettingsBtn">⚙️ 顯示設定</button>
     <span style="flex:1;"></span>
     <button class="btn adminOnly" id="autoScheduleBtn">🤖 自動排值班</button>
     <button class="btn solid" id="downloadPdfBtn">📄 下載PDF（單頁）</button>
@@ -644,13 +661,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     <button class="btn" id="logoutBtn" style="border-color:var(--muted);color:var(--muted);">登出</button>
   </div>
 
-  <section class="panel adminOnly no-print">
+  <section class="panel adminOnly no-print settingsPanel">
     <h2>👥 員工管理（設定值班／休假目標天數）</h2>
     <div id="employeeList"></div>
     <button class="btn small" id="addEmpBtn" style="margin-top:8px;">＋ 新增員工</button>
   </section>
 
-  <section class="panel adminOnly no-print">
+  <section class="panel adminOnly no-print settingsPanel">
     <h2>🏷️ 行事內容／地點 標籤（拖曳到下方月曆對應格子）</h2>
     <div id="tagPalette"></div>
     <div style="margin-top:8px;display:flex;gap:6px;">
@@ -709,9 +726,17 @@ function empName(empId, employees){
   const e = employees.find(x=>x.id===empId);
   return e ? e.name : '?';
 }
+const EMP_ABBR_OVERRIDES = {
+  '五哥':'五',
+  '宜穎':'宜',
+  '采萱':'萱',
+  '韋伶':'韋',
+  '筱涵':'涵',
+  '慶祥':'慶'
+};
 function empAbbr(empId, employees){
-  const n = empName(empId, employees);
-  return n.length > 2 ? n.slice(-2) : n; // 顯示最後兩個字，跟原本表格取名習慣接近
+  const n = empName(empId, employees).trim();
+  return EMP_ABBR_OVERRIDES[n] || n.charAt(0) || '?';
 }
 function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 
@@ -1538,6 +1563,10 @@ document.getElementById('prevMonthBtn').addEventListener('click', ()=>{
 document.getElementById('nextMonthBtn').addEventListener('click', ()=>{
   const d = new Date(curYear, curMonth, 1);
   switchToMonth(ymKey(d.getFullYear(), d.getMonth()+1));
+});
+document.getElementById('toggleSettingsBtn').addEventListener('click', (e)=>{
+  const hidden = document.body.classList.toggle('settings-hidden');
+  e.currentTarget.textContent = hidden ? '⚙️ 顯示設定' : '✕ 收起設定';
 });
 function escapePdfHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
