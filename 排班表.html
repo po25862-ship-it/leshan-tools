@@ -924,7 +924,10 @@ function ensureEmpData(empId){
 
 function queueSave(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{ Store.saveMonth(ymKey(curYear,curMonth), monthData); }, 250);
+  // 即時訂閱可能在 debounce 期間送回舊資料；先建立快照，避免新欄位被舊快照覆蓋後又存回去。
+  const ym = ymKey(curYear,curMonth);
+  const snapshot = JSON.parse(JSON.stringify(monthData));
+  saveTimer = setTimeout(()=>{ Store.saveMonth(ym, snapshot); }, 250);
 }
 
 ///////////////////// 權限判斷 /////////////////////
